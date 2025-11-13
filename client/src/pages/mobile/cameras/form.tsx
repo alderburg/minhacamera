@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Trash2, Loader2 } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Camera, InsertCamera, Empresa } from "@shared/schema";
 
@@ -86,27 +86,6 @@ export default function MobileCameraForm() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("DELETE", `/api/cameras/${cameraId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cameras"] });
-      toast({
-        title: "Câmera excluída",
-        description: "A câmera foi excluída com sucesso",
-      });
-      setLocation("/mobile/cameras");
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao excluir câmera",
-        description: error.message,
-      });
-    },
-  });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isSuperAdmin && !formData.empresaId) {
@@ -118,12 +97,6 @@ export default function MobileCameraForm() {
       return;
     }
     saveMutation.mutate(formData);
-  };
-
-  const handleDelete = () => {
-    if (window.confirm("Tem certeza que deseja excluir esta câmera?")) {
-      deleteMutation.mutate();
-    }
   };
 
   return (
@@ -263,7 +236,7 @@ export default function MobileCameraForm() {
         </div>
 
         </div>
-        <div className="mt-6 space-y-3 px-4">
+        <div className="mt-6 px-4">
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white h-12 text-base font-semibold"
@@ -281,28 +254,6 @@ export default function MobileCameraForm() {
               </>
             )}
           </Button>
-
-          {isEditing && (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full border-red-200 text-red-600 hover:bg-red-50 h-12 text-base font-semibold"
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Excluindo...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-5 w-5 mr-2" />
-                  Excluir Câmera
-                </>
-              )}
-            </Button>
-          )}
         </div>
       </form>
 

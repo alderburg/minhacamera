@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Trash2, Loader2 } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Empresa, InsertEmpresa } from "@shared/schema";
 
@@ -70,36 +70,9 @@ export default function MobileEmpresaForm() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("DELETE", `/api/empresas/${empresaId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
-      toast({
-        title: "Empresa excluída",
-        description: "A empresa foi excluída com sucesso",
-      });
-      setLocation("/mobile/empresas");
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao excluir empresa",
-        description: error.message,
-      });
-    },
-  });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveMutation.mutate(formData);
-  };
-
-  const handleDelete = () => {
-    if (window.confirm("Tem certeza que deseja excluir esta empresa?")) {
-      deleteMutation.mutate();
-    }
   };
 
   return (
