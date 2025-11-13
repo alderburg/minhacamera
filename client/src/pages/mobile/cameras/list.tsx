@@ -157,8 +157,8 @@ export default function MobileCamerasList() {
       </div>
 
       <Link href="/mobile/cameras/new">
-        <button 
-          className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center justify-center transition-all hover:scale-105 z-40"
+        <button
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center transition-all hover:scale-105 z-40"
           data-testid="button-add-camera"
         >
           <Plus className="h-6 w-6" />
