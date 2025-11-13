@@ -157,6 +157,12 @@ export default function Clientes() {
       .toUpperCase();
   };
 
+  const handleNewCliente = () => {
+    setEditingCliente(null);
+    setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
+    setIsDialogOpen(true);
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -172,7 +178,7 @@ export default function Clientes() {
           <h1 className="text-2xl font-semibold mb-2">Clientes</h1>
           <p className="text-muted-foreground">Gerenciar clientes do sistema</p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)} data-testid="button-add-cliente">
+        <Button onClick={handleNewCliente} data-testid="button-add-cliente">
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
         </Button>
@@ -242,7 +248,7 @@ export default function Clientes() {
             <p className="text-sm text-muted-foreground mb-4">
               Comece criando seu primeiro cliente
             </p>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={handleNewCliente}>
               <Plus className="h-4 w-4 mr-2" />
               Novo Cliente
             </Button>

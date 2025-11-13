@@ -245,6 +245,20 @@ export default function CamerasManagement() {
     );
   }
 
+  const handleNewCamera = () => {
+    setEditingCamera(null);
+    setFormData({
+      nome: "",
+      urlRtsp: "",
+      empresaId: 0,
+      ativa: true,
+      localizacao: "",
+      diasGravacao: 7,
+      resolucaoPreferida: "720p",
+    });
+    setIsDialogOpen(true);
+  };
+
   if (fullscreenCamera) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
@@ -279,7 +293,7 @@ export default function CamerasManagement() {
           <h1 className="text-2xl font-semibold mb-2">Câmeras</h1>
           <p className="text-muted-foreground">Gerenciar câmeras do sistema</p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)} data-testid="button-add-camera">
+        <Button onClick={handleNewCamera} data-testid="button-add-camera">
           <Plus className="h-4 w-4 mr-2" />
           Nova Câmera
         </Button>
@@ -386,7 +400,7 @@ export default function CamerasManagement() {
             <p className="text-sm text-muted-foreground mb-4">
               Comece criando sua primeira câmera
             </p>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={handleNewCamera}>
               <Plus className="h-4 w-4 mr-2" />
               Nova Câmera
             </Button>

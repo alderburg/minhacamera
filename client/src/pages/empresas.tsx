@@ -202,6 +202,14 @@ export default function Empresas() {
     );
   }
 
+  const handleNewEmpresa = () => {
+    setEditingEmpresa(null);
+    setSubdomain("");
+    setSubdomainStatus({ checking: false, available: null, message: "" });
+    setFormData({ nome: "", logo: "", dominio: "", ativo: true });
+    setIsDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -209,7 +217,7 @@ export default function Empresas() {
           <h1 className="text-2xl font-semibold mb-2">Empresas</h1>
           <p className="text-muted-foreground">Gerenciar empresas do sistema</p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)} data-testid="button-add-empresa">
+        <Button onClick={handleNewEmpresa} data-testid="button-add-empresa">
           <Plus className="h-4 w-4 mr-2" />
           Nova Empresa
         </Button>
@@ -278,7 +286,7 @@ export default function Empresas() {
             <p className="text-sm text-muted-foreground mb-4">
               Comece criando sua primeira empresa
             </p>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={handleNewEmpresa}>
               <Plus className="h-4 w-4 mr-2" />
               Nova Empresa
             </Button>
