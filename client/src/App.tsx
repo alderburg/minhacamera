@@ -76,24 +76,51 @@ function PublicRoute({ component: Component, ...rest }: any) {
   return <Component {...rest} />;
 }
 
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+  read: boolean;
+  createdAt: string;
+}
+
+function formatTimeAgo(date: string): string {
+  const now = new Date();
+  const past = new Date(date);
+  const diffMs = now.getTime() - past.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Agora";
+  if (diffMins < 60) return `${diffMins} min atrás`;
+  if (diffHours < 24) return `${diffHours}h atrás`;
+  return `${diffDays}d atrás`;
+}
+
 function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Nova câmera adicionada",
-      message: "A câmera 'Entrada Principal' foi adicionada com sucesso.",
-      time: "5 min atrás",
-      read: false,
+  
+  const { data: notifications = [] } = useQuery<Notification[]>({
+    queryKey: ["/api/notifications"],
+    refetchInterval: 10000,
+  });
+
+  const markAsReadMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("POST", `/api/notifications/${id}/read`);
     },
-  ]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+    },
+  });
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const markAsRead = (id: number) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
+    markAsReadMutation.mutate(id);
   };
 
   return (
@@ -137,7 +164,7 @@ function NotificationBell() {
                         {notification.message}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {notification.time}
+                        {formatTimeAgo(notification.createdAt)}
                       </p>
                     </div>
                     {!notification.read && (

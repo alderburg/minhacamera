@@ -219,7 +219,7 @@ export default function MobileCameraForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="flex min-h-screen flex-col overflow-hidden bg-gray-50">
       <MobileTopBar
         showBack
         backUrl="/mobile/cameras"
@@ -227,8 +227,9 @@ export default function MobileCameraForm() {
         subtitle={isEditing ? "Atualize os dados da câmera" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="p-4 pt-24 space-y-6">
-        <div className="space-y-5">
+      <main className="flex-1 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="px-4 pt-24 pb-24 space-y-6">
+          <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
               Nome da Câmera <span className="text-red-500">*</span>
@@ -640,8 +641,9 @@ export default function MobileCameraForm() {
               </>
             )}
           </Button>
-        </div>
-      </form>
+          </div>
+        </form>
+      </main>
 
       <MobileBottomNav />
     </div>
