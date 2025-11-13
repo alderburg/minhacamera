@@ -48,7 +48,7 @@ export default function MobileClienteForm() {
   }, []);
 
   useEffect(() => {
-    if (cliente && clienteId) {
+    if (cliente) {
       setFormData({
         nome: cliente.nome,
         email: cliente.email || "",
@@ -57,14 +57,16 @@ export default function MobileClienteForm() {
         ativo: cliente.ativo,
       });
 
-      // Buscar e definir a empresa selecionada
-      const empresa = empresas?.find(e => e.id === cliente.empresaId);
-      if (empresa) {
-        setSelectedEmpresa(empresa);
-        setEmpresaSearchTerm(empresa.nome);
+      // Buscar e definir a empresa selecionada se for super admin
+      if (isSuperAdmin && empresas) {
+        const empresa = empresas.find(e => e.id === cliente.empresaId);
+        if (empresa) {
+          setSelectedEmpresa(empresa);
+          setEmpresaSearchTerm(empresa.nome);
+        }
       }
     }
-  }, [cliente, clienteId, empresas]);
+  }, [cliente, empresas, isSuperAdmin]);
 
   if (isEditing && isLoadingCliente) {
     return (

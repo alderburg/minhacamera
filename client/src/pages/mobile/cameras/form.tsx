@@ -51,7 +51,7 @@ export default function MobileCameraForm() {
   }, []);
 
   useEffect(() => {
-    if (camera && cameraId) {
+    if (camera) {
       setFormData({
         nome: camera.nome,
         urlRtsp: camera.urlRtsp,
@@ -62,14 +62,16 @@ export default function MobileCameraForm() {
         resolucaoPreferida: camera.resolucaoPreferida || "720p",
       });
 
-      // Buscar e definir a empresa selecionada
-      const empresa = empresas?.find(e => e.id === camera.empresaId);
-      if (empresa) {
-        setSelectedEmpresa(empresa);
-        setEmpresaSearchTerm(empresa.nome);
+      // Buscar e definir a empresa selecionada se for super admin
+      if (isSuperAdmin && empresas) {
+        const empresa = empresas.find(e => e.id === camera.empresaId);
+        if (empresa) {
+          setSelectedEmpresa(empresa);
+          setEmpresaSearchTerm(empresa.nome);
+        }
       }
     }
-  }, [camera, cameraId, empresas]);
+  }, [camera, empresas, isSuperAdmin]);
 
   if (isEditing && isLoadingCamera) {
     return (

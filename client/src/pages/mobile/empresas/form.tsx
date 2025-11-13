@@ -36,7 +36,7 @@ export default function MobileEmpresaForm() {
   }, []);
 
   useEffect(() => {
-    if (empresa && empresaId) {
+    if (empresa) {
       setFormData({
         nome: empresa.nome,
         logo: empresa.logo || "",
@@ -44,7 +44,7 @@ export default function MobileEmpresaForm() {
         ativo: empresa.ativo,
       });
     }
-  }, [empresa, empresaId]);
+  }, [empresa]);
 
   if (isEditing && isLoadingEmpresa) {
     return (
