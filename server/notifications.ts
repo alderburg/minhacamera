@@ -3,6 +3,7 @@ import { users, empresas, clientes, cameras, cameraAcessos, notifications } from
 import { eq, and, or, desc } from "drizzle-orm";
 import { hash, compare } from "bcryptjs";
 import { checkCameraHealth } from "./camera-health";
+import { broadcastNotification } from "./websocket";
 import type { InsertNotification, Notification } from "@shared/schema";
 
 export async function createNotification(
@@ -19,6 +20,9 @@ export async function createNotification(
     userId: userId || null,
     empresaId: empresaId || null,
   }).returning();
+
+  // Broadcast notificação via WebSocket
+  broadcastNotification(notification);
 
   return notification;
 }

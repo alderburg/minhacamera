@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok" });
   });
 
-  // ==================== AUTH ROUTES ====================
+  // ==================== AUTHROUTES ====================
 
   // Login
   app.post("/api/auth/login", async (req, res) => {
@@ -126,10 +126,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create empresa
   app.post("/api/empresas", authenticateToken, requireRole("super_admin"), async (req: AuthRequest, res) => {
     try {
       const empresaData = insertEmpresaSchema.parse(req.body);
       const empresa = await storage.createEmpresa(empresaData);
+
+      // Criar notificação de sucesso
+      await createNotification(
+        "Empresa cadastrada",
+        `A empresa "${empresa.nome}" foi cadastrada com sucesso no sistema.`,
+        "success"
+      );
+
       res.status(201).json(empresa);
     } catch (error) {
       console.error("Create empresa error:", error);
@@ -145,6 +154,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!empresa) {
         return res.status(404).json({ message: "Empresa não encontrada" });
       }
+
+      // Criar notificação de atualização
+      await createNotification(
+        "Empresa atualizada",
+        `Os dados da empresa "${empresa.nome}" foram atualizados com sucesso.`,
+        "info",
+        undefined,
+        empresa.id
+      );
+
       res.json(empresa);
     } catch (error) {
       console.error("Update empresa error:", error);
@@ -227,6 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create cliente
   app.post("/api/clientes", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
@@ -247,6 +267,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const cliente = await storage.createCliente(clienteData);
+
+      // Criar notificação de sucesso
+      await createNotification(
+        "Cliente cadastrado",
+        `O cliente "${cliente.nome}" foi cadastrado com sucesso.`,
+        "success",
+        undefined,
+        clienteData.empresaId
+      );
+
       res.status(201).json(cliente);
     } catch (error) {
       console.error("Create cliente error:", error);
@@ -275,6 +305,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const cliente = await storage.updateCliente(id, clienteData);
+
+      // Criar notificação de atualização
+      await createNotification(
+        "Cliente atualizado",
+        `Os dados do cliente "${cliente.nome}" foram atualizados com sucesso.`,
+        "info",
+        undefined,
+        clienteData.empresaId
+      );
+
       res.json(cliente);
     } catch (error) {
       console.error("Update cliente error:", error);
@@ -376,6 +416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create camera
   app.post("/api/cameras", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
@@ -397,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const camera = await storage.createCamera(cameraData);
-      
+
       // Create notification
       await createNotification(
         'Nova Câmera Cadastrada',
@@ -406,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         undefined,
         camera.empresaId
       );
-      
+
       res.status(201).json(camera);
     } catch (error) {
       console.error("Create camera error:", error);
@@ -436,7 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cameraData = insertCameraSchema.parse(req.body);
 
       const camera = await storage.updateCamera(id, cameraData);
-      
+
       // Create notification
       await createNotification(
         'Câmera Atualizada',
@@ -445,7 +486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         undefined,
         camera?.empresaId || existingCamera.empresaId
       );
-      
+
       res.json(camera);
     } catch (error) {
       console.error("Update camera error:", error);
@@ -479,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         undefined,
         existingCamera.empresaId
       );
-      
+
       await storage.deleteCamera(id);
       res.json({ message: "Câmera excluída com sucesso" });
     } catch (error) {
@@ -764,7 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Dashboard stats
+  // Dashboard stats (duplicate route, keeping the last one)
   app.get("/api/dashboard/stats", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
