@@ -2,7 +2,7 @@ import { MobileTopBar } from "@/components/mobile-top-bar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, Search, Video, MapPin, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Video, MapPin, Pencil, Trash2, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
@@ -13,11 +13,18 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function MobileCamerasList() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAccessDialog, setShowAccessDialog] = useState(false);
+  const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const openAccessDialog = (camera: Camera) => {
+    setSelectedCamera(camera);
+    setShowAccessDialog(true);
+  };
 
   const { data: cameras, isLoading } = useQuery<Camera[]>({
     queryKey: ["/api/cameras"],
@@ -134,13 +141,27 @@ export default function MobileCamerasList() {
                         <span className="truncate">{camera.localizacao}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant={camera.ativa ? "default" : "secondary"} className="text-xs">
+                        {camera.ativa ? "Ativa" : "Inativa"}
+                      </Badge>
                       <Badge variant="outline" className="text-xs">
                         {camera.resolucaoPreferida || "720p"}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
                         {camera.diasGravacao || 7} dias
                       </Badge>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openAccessDialog(camera);
+                        }}
+                        className="ml-auto flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        <Users className="h-3.5 w-3.5" />
+                        Acessos
+                      </button>
                     </div>
                   </div>
                 </div>
