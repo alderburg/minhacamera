@@ -103,46 +103,51 @@ export default function MobileCamerasList() {
         ) : (
           <div className="space-y-3 px-0 md:px-0">
             {filteredCameras.map((camera) => (
-              <div key={camera.id} className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:bg-gray-50 transition-colors">
-                <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
-                  <Video className="h-12 w-12 text-gray-600" />
-                  <div className="absolute top-2 right-2">
-                    <CameraStatus online={camera.online ?? false} />
+              <Link key={camera.id} href={`/mobile/cameras/view/${camera.id}`}>
+                <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:bg-gray-50 transition-colors">
+                  <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
+                    <Video className="h-12 w-12 text-gray-600" />
+                    <div className="absolute top-2 right-2">
+                      <CameraStatus status={camera.status as 'online' | 'offline' | 'error' | 'disabled'} />
+                    </div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-gray-900 truncate">{camera.nome}</h3>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Link href={`/mobile/cameras/edit/${camera.id}`}>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-                          <Pencil className="h-4 w-4 text-blue-600" />
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-semibold text-gray-900 truncate">{camera.nome}</h3>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Link href={`/mobile/cameras/edit/${camera.id}`}>
+                          <button 
+                            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Pencil className="h-4 w-4 text-blue-600" />
+                          </button>
+                        </Link>
+                        <button
+                          onClick={(e) => handleDelete(e, camera.id, camera.nome)}
+                          className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
                         </button>
-                      </Link>
-                      <button
-                        onClick={(e) => handleDelete(e, camera.id, camera.nome)}
-                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </button>
+                      </div>
                     </div>
-                  </div>
-                  {camera.localizacao && (
-                    <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
-                      <MapPin className="h-3.5 w-3.5" />
-                      <span className="truncate">{camera.localizacao}</span>
+                    {camera.localizacao && (
+                      <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
+                        <MapPin className="h-3.5 w-3.5" />
+                        <span className="truncate">{camera.localizacao}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {camera.resolucaoPreferida || "720p"}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {camera.diasGravacao || 7} dias
+                      </Badge>
                     </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {camera.resolucaoPreferida || "720p"}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {camera.diasGravacao || 7} dias
-                    </Badge>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

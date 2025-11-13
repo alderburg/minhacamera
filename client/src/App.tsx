@@ -25,6 +25,7 @@ import MobileClientesList from "@/pages/mobile/clientes/list";
 import MobileClienteForm from "@/pages/mobile/clientes/form";
 import MobileCamerasList from "@/pages/mobile/cameras/list";
 import MobileCameraForm from "@/pages/mobile/cameras/form";
+import MobileCameraView from "@/pages/mobile/cameras/view";
 import MobileNotificacoes from "@/pages/mobile/notificacoes";
 import MobileConfiguracoes from "@/pages/mobile/configuracoes";
 import MobilePerfil from "@/pages/mobile/perfil";
@@ -288,6 +289,10 @@ function Router() {
 
       <Route path="/mobile/cameras/edit/:id">
         <ProtectedRoute component={MobileCameraForm} />
+      </Route>
+
+      <Route path="/mobile/cameras/view/:id">
+        <ProtectedRoute component={MobileCameraView} />
       </Route>
 
       <Route path="/mobile/cameras">
