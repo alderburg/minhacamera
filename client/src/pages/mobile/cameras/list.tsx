@@ -58,8 +58,8 @@ export default function MobileCamerasList() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0 overflow-x-hidden">
-      <MobileTopBar 
-        showBack 
+      <MobileTopBar
+        showBack
         backUrl="/dashboard"
         title="Câmeras"
         subtitle={`${filteredCameras.length} câmeras cadastradas`}
@@ -124,7 +124,7 @@ export default function MobileCamerasList() {
                           <Pencil className="h-4 w-4 text-blue-600" />
                         </button>
                       </Link>
-                      <button 
+                      <button
                         onClick={(e) => handleDelete(e, camera.id, camera.nome)}
                         className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
                       >

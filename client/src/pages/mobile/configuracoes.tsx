@@ -11,8 +11,8 @@ export default function MobileConfiguracoes() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
-      <MobileTopBar 
-        showBack 
+      <MobileTopBar
+        showBack
         backUrl="/mobile/menu"
         title="Configurações"
         subtitle="Preferências do sistema"
