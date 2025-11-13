@@ -24,15 +24,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Loader2, Mail, Phone, Pencil, Trash2 } from "lucide-react";
+import { Plus, Users, Loader2, Mail, Phone, Pencil, Trash2, Building2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Cliente, InsertCliente, Empresa } from "@shared/schema";
@@ -43,6 +36,8 @@ export default function Clientes() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [deletingCliente, setDeletingCliente] = useState<Cliente | null>(null);
+  const [empresaSearchTerm, setEmpresaSearchTerm] = useState("");
+  const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [formData, setFormData] = useState<InsertCliente>({
     nome: "",
     email: "",
@@ -114,11 +109,29 @@ export default function Clientes() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isSuperAdmin && !formData.empresaId) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Selecione uma empresa para o cliente",
+      });
+      return;
+    }
+    
     createMutation.mutate(formData);
   };
 
   const handleEdit = (cliente: Cliente) => {
     setEditingCliente(cliente);
+    
+    // Buscar e definir a empresa selecionada
+    const empresa = empresas?.find(e => e.id === cliente.empresaId);
+    if (empresa) {
+      setSelectedEmpresa(empresa);
+      setEmpresaSearchTerm(empresa.nome);
+    }
+    
     setFormData({
       nome: cliente.nome,
       email: cliente.email,
@@ -128,6 +141,27 @@ export default function Clientes() {
     });
     setIsDialogOpen(true);
   };
+
+  const handleSelectEmpresa = (empresa: Empresa) => {
+    setSelectedEmpresa(empresa);
+    setFormData({ ...formData, empresaId: empresa.id });
+    setEmpresaSearchTerm(empresa.nome);
+  };
+
+  const handleRemoveEmpresa = () => {
+    setSelectedEmpresa(null);
+    setFormData({ ...formData, empresaId: 0 });
+    setEmpresaSearchTerm("");
+  };
+
+  const filteredEmpresas = empresas?.filter((empresa) => {
+    if (!empresaSearchTerm) return true;
+    const search = empresaSearchTerm.toLowerCase();
+    return (
+      empresa.nome.toLowerCase().includes(search) ||
+      empresa.dominio?.toLowerCase().includes(search)
+    );
+  }).filter((empresa) => !selectedEmpresa || empresa.id !== selectedEmpresa.id);
 
   const handleDelete = (cliente: Cliente) => {
     setDeletingCliente(cliente);
@@ -143,6 +177,8 @@ export default function Clientes() {
   const handleDialogClose = (open: boolean) => {
     if (!open) {
       setEditingCliente(null);
+      setSelectedEmpresa(null);
+      setEmpresaSearchTerm("");
       setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
     }
     setIsDialogOpen(open);
@@ -159,6 +195,8 @@ export default function Clientes() {
 
   const handleNewCliente = () => {
     setEditingCliente(null);
+    setSelectedEmpresa(null);
+    setEmpresaSearchTerm("");
     setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
     setIsDialogOpen(true);
   };
@@ -268,24 +306,65 @@ export default function Clientes() {
             {isSuperAdmin && (
               <div className="space-y-2">
                 <Label htmlFor="empresa">Empresa *</Label>
-                <Select
-                  value={formData.empresaId?.toString()}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, empresaId: parseInt(value) })
-                  }
-                  required
-                >
-                  <SelectTrigger data-testid="select-empresa">
-                    <SelectValue placeholder="Selecione uma empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {empresas?.map((empresa) => (
-                      <SelectItem key={empresa.id} value={empresa.id.toString()}>
-                        {empresa.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                
+                {selectedEmpresa ? (
+                  <div className="flex items-center gap-2 p-3 rounded-md border bg-muted">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{selectedEmpresa.nome}</p>
+                      {selectedEmpresa.dominio && (
+                        <p className="text-xs text-muted-foreground truncate">{selectedEmpresa.dominio}</p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={handleRemoveEmpresa}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Input
+                      id="empresa"
+                      placeholder="Buscar empresa por nome ou domínio..."
+                      value={empresaSearchTerm}
+                      onChange={(e) => setEmpresaSearchTerm(e.target.value)}
+                      data-testid="input-empresa-search"
+                    />
+                    
+                    {empresaSearchTerm && filteredEmpresas && filteredEmpresas.length > 0 && (
+                      <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2">
+                        {filteredEmpresas.map((empresa) => (
+                          <div
+                            key={empresa.id}
+                            className="flex items-center gap-3 p-3 rounded-md hover-elevate cursor-pointer"
+                            onClick={() => handleSelectEmpresa(empresa)}
+                            data-testid={`search-result-empresa-${empresa.id}`}
+                          >
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{empresa.nome}</p>
+                              {empresa.dominio && (
+                                <p className="text-xs text-muted-foreground truncate">{empresa.dominio}</p>
+                              )}
+                            </div>
+                            <Plus className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {empresaSearchTerm && filteredEmpresas && filteredEmpresas.length === 0 && (
+                      <div className="text-center py-4 text-sm text-muted-foreground border rounded-lg">
+                        Nenhuma empresa encontrada
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 
