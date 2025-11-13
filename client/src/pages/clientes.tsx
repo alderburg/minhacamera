@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -22,6 +22,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,7 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Loader2, Mail, Phone, Pencil, Trash2 } from "lucide-react";
+import { Plus, Users, Loader2, Mail, Phone, Pencil, Trash2, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Cliente, InsertCliente, Empresa } from "@shared/schema";
@@ -43,6 +51,9 @@ export default function Clientes() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [deletingCliente, setDeletingCliente] = useState<Cliente | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState<InsertCliente>({
     nome: "",
     email: "",
@@ -63,6 +74,25 @@ export default function Clientes() {
     queryKey: ["/api/empresas"],
     enabled: isSuperAdmin,
   });
+
+  const filteredClientes = useMemo(() => {
+    if (!clientes) return [];
+    
+    return clientes.filter((cliente) => {
+      const matchesSearch = 
+        cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (cliente.telefone && cliente.telefone.includes(searchTerm));
+      
+      return matchesSearch;
+    });
+  }, [clientes, searchTerm]);
+
+  const totalPages = Math.ceil(filteredClientes.length / itemsPerPage);
+  const paginatedClientes = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredClientes.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredClientes, currentPage, itemsPerPage]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertCliente) => {
@@ -170,7 +200,9 @@ export default function Clientes() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Clientes</h1>
-          <p className="text-muted-foreground">Gerenciar clientes do sistema</p>
+          <p className="text-muted-foreground">
+            {filteredClientes.length} {filteredClientes.length === 1 ? "cliente" : "clientes"}
+          </p>
         </div>
         <Button onClick={() => setIsDialogOpen(true)} data-testid="button-add-cliente">
           <Plus className="h-4 w-4 mr-2" />
@@ -178,8 +210,40 @@ export default function Clientes() {
         </Button>
       </div>
 
+      <div className="flex items-center gap-4 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, email ou telefone..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-9"
+            data-testid="input-search-clientes"
+          />
+        </div>
+        <Select
+          value={itemsPerPage.toString()}
+          onValueChange={(value) => {
+            setItemsPerPage(parseInt(value));
+            setCurrentPage(1);
+          }}
+        >
+          <SelectTrigger className="w-[140px]" data-testid="select-items-per-page">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="12">12 por página</SelectItem>
+            <SelectItem value="24">24 por página</SelectItem>
+            <SelectItem value="48">48 por página</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {clientes?.map((cliente) => (
+        {paginatedClientes.map((cliente) => (
           <Card key={cliente.id} className="hover-elevate" data-testid={`cliente-card-${cliente.id}`}>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
@@ -234,20 +298,54 @@ export default function Clientes() {
         ))}
       </div>
 
-      {clientes?.length === 0 && (
+      {filteredClientes.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum cliente cadastrado</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {searchTerm ? "Nenhum cliente encontrado" : "Nenhum cliente cadastrado"}
+            </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Comece criando seu primeiro cliente
+              {searchTerm ? "Tente ajustar sua busca" : "Comece criando seu primeiro cliente"}
             </p>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Cliente
-            </Button>
+            {!searchTerm && (
+              <Button onClick={() => setIsDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Cliente
+              </Button>
+            )}
           </CardContent>
         </Card>
+      )}
+
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(page)}
+                  isActive={currentPage === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
