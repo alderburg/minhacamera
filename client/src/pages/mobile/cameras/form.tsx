@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Loader2, Building2, X, Plus } from "lucide-react";
+import { Save, Loader2, Building2, X, Plus, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Camera, InsertCamera, Empresa } from "@shared/schema";
 
@@ -25,7 +25,18 @@ export default function MobileCameraForm() {
 
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
-    urlRtsp: "",
+    protocolo: "RTSP",
+    urlConexao: "",
+    usuario: "",
+    senhaCam: "",
+    ip: "",
+    porta: undefined,
+    canalRtsp: "",
+    onvifPort: undefined,
+    profileToken: "",
+    p2pId: "",
+    p2pPassword: "",
+    streamPath: "",
     empresaId: user?.empresaId || 0,
     ativa: true,
     localizacao: "",
@@ -78,7 +89,18 @@ export default function MobileCameraForm() {
     if (camera) {
       setFormData({
         nome: camera.nome,
-        urlRtsp: camera.urlRtsp,
+        protocolo: camera.protocolo || "RTSP",
+        urlConexao: camera.urlConexao || "",
+        usuario: camera.usuario || "",
+        senhaCam: camera.senhaCam || "",
+        ip: camera.ip || "",
+        porta: camera.porta || undefined,
+        canalRtsp: camera.canalRtsp || "",
+        onvifPort: camera.onvifPort || undefined,
+        profileToken: camera.profileToken || "",
+        p2pId: camera.p2pId || "",
+        p2pPassword: camera.p2pPassword || "",
+        streamPath: camera.streamPath || "",
         empresaId: camera.empresaId,
         ativa: camera.ativa,
         localizacao: camera.localizacao || "",
@@ -86,7 +108,6 @@ export default function MobileCameraForm() {
         resolucaoPreferida: camera.resolucaoPreferida || "720p",
       });
 
-      // Buscar e definir a empresa selecionada se for super admin
       if (isSuperAdmin && empresas) {
         const empresa = empresas.find(e => e.id === camera.empresaId);
         if (empresa) {
@@ -148,6 +169,25 @@ export default function MobileCameraForm() {
     saveMutation.mutate(formData);
   };
 
+  const getProtocolHelp = () => {
+    switch (formData.protocolo) {
+      case "RTSP":
+        return "Real Time Streaming Protocol - Mais comum para câmeras IP";
+      case "ONVIF":
+        return "Padrão universal para câmeras IP com descoberta automática";
+      case "P2P":
+        return "Peer-to-Peer - Conexão direta sem configuração de rede";
+      case "HTTP":
+        return "Stream via HTTP/HTTPS (MJPEG, Snapshot)";
+      case "RTMP":
+        return "Real-Time Messaging Protocol - Para streaming ao vivo";
+      case "HLS":
+        return "HTTP Live Streaming - Compatível com navegadores";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
       <MobileTopBar
@@ -175,22 +215,244 @@ export default function MobileCameraForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="urlRtsp" className="text-sm font-medium text-gray-700">
-              URL RTSP <span className="text-red-500">*</span>
+            <Label htmlFor="protocolo" className="text-sm font-medium text-gray-700">
+              Protocolo <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="urlRtsp"
-              value={formData.urlRtsp}
-              onChange={(e) => setFormData({ ...formData, urlRtsp: e.target.value })}
-              placeholder="rtsp://usuario:senha@ip:porta/stream"
-              required
-              className="h-12 bg-white"
-              data-testid="input-url-rtsp"
-            />
-            <p className="text-xs text-muted-foreground">
-              URL de streaming da câmera IP
-            </p>
+            <Select
+              value={formData.protocolo}
+              onValueChange={(value) => setFormData({ ...formData, protocolo: value as any })}
+            >
+              <SelectTrigger className="h-12 bg-white" data-testid="select-protocolo">
+                <SelectValue placeholder="Selecione o protocolo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="RTSP">RTSP - Real Time Streaming</SelectItem>
+                <SelectItem value="ONVIF">ONVIF - Padrão Universal</SelectItem>
+                <SelectItem value="P2P">P2P - Peer to Peer</SelectItem>
+                <SelectItem value="HTTP">HTTP - Web Stream</SelectItem>
+                <SelectItem value="RTMP">RTMP - Real-Time Messaging</SelectItem>
+                <SelectItem value="HLS">HLS - HTTP Live Streaming</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-md">
+              <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-blue-700">{getProtocolHelp()}</p>
+            </div>
           </div>
+
+          {/* Campos para RTSP */}
+          {formData.protocolo === "RTSP" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="urlConexao" className="text-sm font-medium text-gray-700">
+                  URL RTSP <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="urlConexao"
+                  value={formData.urlConexao}
+                  onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
+                  placeholder="rtsp://usuario:senha@192.168.1.100:554/stream"
+                  required
+                  className="h-12 bg-white font-mono text-sm"
+                  data-testid="input-url-conexao"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="canalRtsp" className="text-sm font-medium text-gray-700">
+                  Canal/Caminho do Stream
+                </Label>
+                <Input
+                  id="canalRtsp"
+                  value={formData.canalRtsp}
+                  onChange={(e) => setFormData({ ...formData, canalRtsp: e.target.value })}
+                  placeholder="/stream1 ou /Streaming/Channels/101"
+                  className="h-12 bg-white font-mono text-sm"
+                  data-testid="input-canal-rtsp"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Campos para ONVIF */}
+          {formData.protocolo === "ONVIF" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="ip" className="text-sm font-medium text-gray-700">
+                  IP da Câmera <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="ip"
+                  value={formData.ip}
+                  onChange={(e) => setFormData({ ...formData, ip: e.target.value })}
+                  placeholder="192.168.1.100"
+                  required
+                  className="h-12 bg-white font-mono"
+                  data-testid="input-ip"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="onvifPort" className="text-sm font-medium text-gray-700">
+                    Porta ONVIF
+                  </Label>
+                  <Input
+                    id="onvifPort"
+                    type="number"
+                    value={formData.onvifPort || ""}
+                    onChange={(e) => setFormData({ ...formData, onvifPort: e.target.value ? parseInt(e.target.value) : undefined })}
+                    placeholder="80"
+                    className="h-12 bg-white"
+                    data-testid="input-onvif-port"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="porta" className="text-sm font-medium text-gray-700">
+                    Porta RTSP
+                  </Label>
+                  <Input
+                    id="porta"
+                    type="number"
+                    value={formData.porta || ""}
+                    onChange={(e) => setFormData({ ...formData, porta: e.target.value ? parseInt(e.target.value) : undefined })}
+                    placeholder="554"
+                    className="h-12 bg-white"
+                    data-testid="input-porta"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="usuario" className="text-sm font-medium text-gray-700">
+                  Usuário
+                </Label>
+                <Input
+                  id="usuario"
+                  value={formData.usuario}
+                  onChange={(e) => setFormData({ ...formData, usuario: e.target.value })}
+                  placeholder="admin"
+                  className="h-12 bg-white"
+                  data-testid="input-usuario"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="senhaCam" className="text-sm font-medium text-gray-700">
+                  Senha
+                </Label>
+                <Input
+                  id="senhaCam"
+                  type="password"
+                  value={formData.senhaCam}
+                  onChange={(e) => setFormData({ ...formData, senhaCam: e.target.value })}
+                  placeholder="••••••••"
+                  className="h-12 bg-white"
+                  data-testid="input-senha-cam"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Campos para P2P */}
+          {formData.protocolo === "P2P" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="p2pId" className="text-sm font-medium text-gray-700">
+                  ID do Dispositivo P2P <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="p2pId"
+                  value={formData.p2pId}
+                  onChange={(e) => setFormData({ ...formData, p2pId: e.target.value })}
+                  placeholder="XXXX-XXXX-XXXX-XXXX"
+                  required
+                  className="h-12 bg-white font-mono"
+                  data-testid="input-p2p-id"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p2pPassword" className="text-sm font-medium text-gray-700">
+                  Senha P2P
+                </Label>
+                <Input
+                  id="p2pPassword"
+                  type="password"
+                  value={formData.p2pPassword}
+                  onChange={(e) => setFormData({ ...formData, p2pPassword: e.target.value })}
+                  placeholder="••••••••"
+                  className="h-12 bg-white"
+                  data-testid="input-p2p-password"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Campos para HTTP/RTMP/HLS */}
+          {(formData.protocolo === "HTTP" || formData.protocolo === "RTMP" || formData.protocolo === "HLS") && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="urlConexao" className="text-sm font-medium text-gray-700">
+                  URL de Conexão <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="urlConexao"
+                  value={formData.urlConexao}
+                  onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
+                  placeholder={
+                    formData.protocolo === "HLS" 
+                      ? "https://exemplo.com/stream.m3u8"
+                      : formData.protocolo === "RTMP"
+                      ? "rtmp://servidor/live/stream"
+                      : "http://192.168.1.100/video.cgi"
+                  }
+                  required
+                  className="h-12 bg-white font-mono text-sm"
+                  data-testid="input-url-conexao"
+                />
+              </div>
+              {formData.protocolo === "HTTP" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="usuario" className="text-sm font-medium text-gray-700">
+                      Usuário
+                    </Label>
+                    <Input
+                      id="usuario"
+                      value={formData.usuario}
+                      onChange={(e) => setFormData({ ...formData, usuario: e.target.value })}
+                      placeholder="admin"
+                      className="h-12 bg-white"
+                      data-testid="input-usuario"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="senhaCam" className="text-sm font-medium text-gray-700">
+                      Senha
+                    </Label>
+                    <Input
+                      id="senhaCam"
+                      type="password"
+                      value={formData.senhaCam}
+                      onChange={(e) => setFormData({ ...formData, senhaCam: e.target.value })}
+                      placeholder="••••••••"
+                      className="h-12 bg-white"
+                      data-testid="input-senha-cam"
+                    />
+                  </div>
+                </>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="streamPath" className="text-sm font-medium text-gray-700">
+                  Caminho do Stream
+                </Label>
+                <Input
+                  id="streamPath"
+                  value={formData.streamPath}
+                  onChange={(e) => setFormData({ ...formData, streamPath: e.target.value })}
+                  placeholder="/stream ou /live/main"
+                  className="h-12 bg-white font-mono text-sm"
+                  data-testid="input-stream-path"
+                />
+              </div>
+            </>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="localizacao" className="text-sm font-medium text-gray-700">

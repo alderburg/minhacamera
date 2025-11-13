@@ -61,7 +61,18 @@ export default function CamerasManagement() {
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
-    urlRtsp: "",
+    protocolo: "RTSP",
+    urlConexao: "",
+    usuario: "",
+    senhaCam: "",
+    ip: "",
+    porta: undefined,
+    canalRtsp: "",
+    onvifPort: undefined,
+    profileToken: "",
+    p2pId: "",
+    p2pPassword: "",
+    streamPath: "",
     empresaId: 0,
     ativa: true,
     localizacao: "",
@@ -173,7 +184,18 @@ export default function CamerasManagement() {
 
     setFormData({
       nome: camera.nome,
-      urlRtsp: camera.urlRtsp,
+      protocolo: camera.protocolo || "RTSP",
+      urlConexao: camera.urlConexao || "",
+      usuario: camera.usuario || "",
+      senhaCam: camera.senhaCam || "",
+      ip: camera.ip || "",
+      porta: camera.porta || undefined,
+      canalRtsp: camera.canalRtsp || "",
+      onvifPort: camera.onvifPort || undefined,
+      profileToken: camera.profileToken || "",
+      p2pId: camera.p2pId || "",
+      p2pPassword: camera.p2pPassword || "",
+      streamPath: camera.streamPath || "",
       empresaId: camera.empresaId,
       ativa: camera.ativa,
       localizacao: camera.localizacao || "",
@@ -200,7 +222,18 @@ export default function CamerasManagement() {
     setEmpresaSearchTerm("");
     setFormData({
       nome: "",
-      urlRtsp: "",
+      protocolo: "RTSP",
+      urlConexao: "",
+      usuario: "",
+      senhaCam: "",
+      ip: "",
+      porta: undefined,
+      canalRtsp: "",
+      onvifPort: undefined,
+      profileToken: "",
+      p2pId: "",
+      p2pPassword: "",
+      streamPath: "",
       empresaId: 0,
       ativa: true,
       localizacao: "",
@@ -293,7 +326,9 @@ export default function CamerasManagement() {
     return (
       camera.nome.toLowerCase().includes(search) ||
       camera.localizacao?.toLowerCase().includes(search) ||
-      camera.urlRtsp.toLowerCase().includes(search)
+      camera.urlConexao?.toLowerCase().includes(search) ||
+      camera.ip?.toLowerCase().includes(search) ||
+      camera.p2pId?.toLowerCase().includes(search)
     );
   }) || [];
 
@@ -394,8 +429,17 @@ export default function CamerasManagement() {
                     <span className="truncate">{camera.localizacao}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono truncate">
-                  <span className="truncate">{camera.urlRtsp}</span>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Badge variant="outline" className="text-xs">{camera.protocolo}</Badge>
+                  {camera.urlConexao && (
+                    <span className="truncate font-mono text-xs">{camera.urlConexao}</span>
+                  )}
+                  {camera.ip && !camera.urlConexao && (
+                    <span className="truncate font-mono text-xs">{camera.ip}</span>
+                  )}
+                  {camera.p2pId && !camera.urlConexao && !camera.ip && (
+                    <span className="truncate font-mono text-xs">{camera.p2pId}</span>
+                  )}
                 </div>
               </div>
 
@@ -604,20 +648,207 @@ export default function CamerasManagement() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="urlRtsp">URL RTSP *</Label>
-              <Input
-                id="urlRtsp"
-                placeholder="rtsp://usuario:senha@ip:porta/stream"
-                value={formData.urlRtsp}
-                onChange={(e) => setFormData({ ...formData, urlRtsp: e.target.value })}
-                required
-                className="font-mono text-sm"
-                data-testid="input-camera-rtsp"
-              />
-              <p className="text-xs text-muted-foreground">
-                URL completa do stream RTSP da câmera IP
-              </p>
+              <Label htmlFor="protocolo">Protocolo *</Label>
+              <Select
+                value={formData.protocolo}
+                onValueChange={(value) => setFormData({ ...formData, protocolo: value as any })}
+              >
+                <SelectTrigger data-testid="select-protocolo">
+                  <SelectValue placeholder="Selecione o protocolo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="RTSP">RTSP - Real Time Streaming</SelectItem>
+                  <SelectItem value="ONVIF">ONVIF - Padrão Universal</SelectItem>
+                  <SelectItem value="P2P">P2P - Peer to Peer</SelectItem>
+                  <SelectItem value="HTTP">HTTP - Web Stream</SelectItem>
+                  <SelectItem value="RTMP">RTMP - Real-Time Messaging</SelectItem>
+                  <SelectItem value="HLS">HLS - HTTP Live Streaming</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Campos para RTSP */}
+            {formData.protocolo === "RTSP" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="urlConexao">URL RTSP *</Label>
+                  <Input
+                    id="urlConexao"
+                    placeholder="rtsp://usuario:senha@192.168.1.100:554/stream"
+                    value={formData.urlConexao}
+                    onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
+                    required
+                    className="font-mono text-sm"
+                    data-testid="input-url-conexao"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="canalRtsp">Canal/Caminho do Stream</Label>
+                  <Input
+                    id="canalRtsp"
+                    value={formData.canalRtsp}
+                    onChange={(e) => setFormData({ ...formData, canalRtsp: e.target.value })}
+                    placeholder="/stream1 ou /Streaming/Channels/101"
+                    className="font-mono text-sm"
+                    data-testid="input-canal-rtsp"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Campos para ONVIF */}
+            {formData.protocolo === "ONVIF" && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ip">IP da Câmera *</Label>
+                    <Input
+                      id="ip"
+                      value={formData.ip}
+                      onChange={(e) => setFormData({ ...formData, ip: e.target.value })}
+                      placeholder="192.168.1.100"
+                      required
+                      className="font-mono"
+                      data-testid="input-ip"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="porta">Porta RTSP</Label>
+                    <Input
+                      id="porta"
+                      type="number"
+                      value={formData.porta || ""}
+                      onChange={(e) => setFormData({ ...formData, porta: e.target.value ? parseInt(e.target.value) : undefined })}
+                      placeholder="554"
+                      data-testid="input-porta"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="usuario">Usuário</Label>
+                    <Input
+                      id="usuario"
+                      value={formData.usuario}
+                      onChange={(e) => setFormData({ ...formData, usuario: e.target.value })}
+                      placeholder="admin"
+                      data-testid="input-usuario"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="senhaCam">Senha</Label>
+                    <Input
+                      id="senhaCam"
+                      type="password"
+                      value={formData.senhaCam}
+                      onChange={(e) => setFormData({ ...formData, senhaCam: e.target.value })}
+                      placeholder="••••••••"
+                      data-testid="input-senha-cam"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="onvifPort">Porta ONVIF</Label>
+                  <Input
+                    id="onvifPort"
+                    type="number"
+                    value={formData.onvifPort || ""}
+                    onChange={(e) => setFormData({ ...formData, onvifPort: e.target.value ? parseInt(e.target.value) : undefined })}
+                    placeholder="80 ou 8000"
+                    data-testid="input-onvif-port"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Campos para P2P */}
+            {formData.protocolo === "P2P" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="p2pId">ID do Dispositivo P2P *</Label>
+                  <Input
+                    id="p2pId"
+                    value={formData.p2pId}
+                    onChange={(e) => setFormData({ ...formData, p2pId: e.target.value })}
+                    placeholder="XXXX-XXXX-XXXX-XXXX"
+                    required
+                    className="font-mono"
+                    data-testid="input-p2p-id"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="p2pPassword">Senha P2P</Label>
+                  <Input
+                    id="p2pPassword"
+                    type="password"
+                    value={formData.p2pPassword}
+                    onChange={(e) => setFormData({ ...formData, p2pPassword: e.target.value })}
+                    placeholder="••••••••"
+                    data-testid="input-p2p-password"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Campos para HTTP/RTMP/HLS */}
+            {(formData.protocolo === "HTTP" || formData.protocolo === "RTMP" || formData.protocolo === "HLS") && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="urlConexao">URL de Conexão *</Label>
+                  <Input
+                    id="urlConexao"
+                    value={formData.urlConexao}
+                    onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
+                    placeholder={
+                      formData.protocolo === "HLS" 
+                        ? "https://exemplo.com/stream.m3u8"
+                        : formData.protocolo === "RTMP"
+                        ? "rtmp://servidor/live/stream"
+                        : "http://192.168.1.100/video.cgi"
+                    }
+                    required
+                    className="font-mono text-sm"
+                    data-testid="input-url-conexao"
+                  />
+                </div>
+                {formData.protocolo === "HTTP" && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="usuario">Usuário</Label>
+                      <Input
+                        id="usuario"
+                        value={formData.usuario}
+                        onChange={(e) => setFormData({ ...formData, usuario: e.target.value })}
+                        placeholder="admin"
+                        data-testid="input-usuario"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="senhaCam">Senha</Label>
+                      <Input
+                        id="senhaCam"
+                        type="password"
+                        value={formData.senhaCam}
+                        onChange={(e) => setFormData({ ...formData, senhaCam: e.target.value })}
+                        placeholder="••••••••"
+                        data-testid="input-senha-cam"
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="streamPath">Caminho do Stream</Label>
+                  <Input
+                    id="streamPath"
+                    value={formData.streamPath}
+                    onChange={(e) => setFormData({ ...formData, streamPath: e.target.value })}
+                    placeholder="/stream ou /live/main"
+                    className="font-mono text-sm"
+                    data-testid="input-stream-path"
+                  />
+                </div>
+              </>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="localizacao">Localização (opcional)</Label>
