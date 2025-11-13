@@ -86,7 +86,7 @@ export default function MobileCameraForm() {
   }, []);
 
   useEffect(() => {
-    if (camera) {
+    if (camera && !isLoadingCamera) {
       setFormData({
         nome: camera.nome,
         protocolo: camera.protocolo || "RTSP",
@@ -116,7 +116,7 @@ export default function MobileCameraForm() {
         }
       }
     }
-  }, [camera, empresas, isSuperAdmin]);
+  }, [camera, empresas, isSuperAdmin, isLoadingCamera]);
 
   if (isEditing && isLoadingCamera) {
     return (
@@ -166,7 +166,7 @@ export default function MobileCameraForm() {
       });
       return;
     }
-    
+
     // Normalize numeric fields to avoid empty string issues
     const normalizedData = {
       ...formData,
@@ -174,7 +174,7 @@ export default function MobileCameraForm() {
       onvifPort: formData.onvifPort || undefined,
       diasGravacao: formData.diasGravacao || 7,
     };
-    
+
     saveMutation.mutate(normalizedData);
   };
 
@@ -402,7 +402,7 @@ export default function MobileCameraForm() {
                   value={formData.urlConexao}
                   onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
                   placeholder={
-                    formData.protocolo === "HLS" 
+                    formData.protocolo === "HLS"
                       ? "https://exemplo.com/stream.m3u8"
                       : formData.protocolo === "RTMP"
                       ? "rtmp://servidor/live/stream"
