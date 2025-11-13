@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -22,25 +22,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Building2, Loader2, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Building2, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Empresa, InsertEmpresa } from "@shared/schema";
 
@@ -50,9 +35,6 @@ export default function Empresas() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
   const [deletingEmpresa, setDeletingEmpresa] = useState<Empresa | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState<InsertEmpresa>({
     nome: "",
     logo: "",
@@ -65,24 +47,6 @@ export default function Empresas() {
     queryKey: ["/api/empresas"],
     enabled: !!user,
   });
-
-  const filteredEmpresas = useMemo(() => {
-    if (!empresas) return [];
-    
-    return empresas.filter((empresa) => {
-      const matchesSearch = 
-        empresa.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (empresa.dominio && empresa.dominio.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      return matchesSearch;
-    });
-  }, [empresas, searchTerm]);
-
-  const totalPages = Math.ceil(filteredEmpresas.length / itemsPerPage);
-  const paginatedEmpresas = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredEmpresas.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredEmpresas, currentPage, itemsPerPage]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertEmpresa) => {
@@ -180,9 +144,7 @@ export default function Empresas() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Empresas</h1>
-          <p className="text-muted-foreground">
-            {filteredEmpresas.length} {filteredEmpresas.length === 1 ? "empresa" : "empresas"}
-          </p>
+          <p className="text-muted-foreground">Gerenciar empresas do sistema</p>
         </div>
         <Button onClick={() => setIsDialogOpen(true)} data-testid="button-add-empresa">
           <Plus className="h-4 w-4 mr-2" />
@@ -190,40 +152,8 @@ export default function Empresas() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome ou domínio..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pl-9"
-            data-testid="input-search-empresas"
-          />
-        </div>
-        <Select
-          value={itemsPerPage.toString()}
-          onValueChange={(value) => {
-            setItemsPerPage(parseInt(value));
-            setCurrentPage(1);
-          }}
-        >
-          <SelectTrigger className="w-[140px]" data-testid="select-items-per-page">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="12">12 por página</SelectItem>
-            <SelectItem value="24">24 por página</SelectItem>
-            <SelectItem value="48">48 por página</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {paginatedEmpresas.map((empresa) => (
+        {empresas?.map((empresa) => (
           <Card key={empresa.id} className="hover-elevate" data-testid={`empresa-card-${empresa.id}`}>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
@@ -277,54 +207,20 @@ export default function Empresas() {
         ))}
       </div>
 
-      {filteredEmpresas.length === 0 && (
+      {empresas?.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {searchTerm ? "Nenhuma empresa encontrada" : "Nenhuma empresa cadastrada"}
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">Nenhuma empresa cadastrada</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {searchTerm ? "Tente ajustar sua busca" : "Comece criando sua primeira empresa"}
+              Comece criando sua primeira empresa
             </p>
-            {!searchTerm && (
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Empresa
-              </Button>
-            )}
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Empresa
+            </Button>
           </CardContent>
         </Card>
-      )}
-
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                  className="cursor-pointer"
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>

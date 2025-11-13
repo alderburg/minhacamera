@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -22,14 +22,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -40,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users, Search } from "lucide-react";
+import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
@@ -55,9 +47,6 @@ export default function CamerasManagement() {
   const [deletingCamera, setDeletingCamera] = useState<Camera | null>(null);
   const [fullscreenCamera, setFullscreenCamera] = useState<Camera | null>(null);
   const [selectedClientes, setSelectedClientes] = useState<number[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
     urlRtsp: "",
@@ -85,25 +74,6 @@ export default function CamerasManagement() {
     queryKey: ["/api/clientes"],
     enabled: !!user,
   });
-
-  const filteredCameras = useMemo(() => {
-    if (!cameras) return [];
-    
-    return cameras.filter((camera) => {
-      const matchesSearch = 
-        camera.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (camera.localizacao && camera.localizacao.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        camera.urlRtsp.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      return matchesSearch;
-    });
-  }, [cameras, searchTerm]);
-
-  const totalPages = Math.ceil(filteredCameras.length / itemsPerPage);
-  const paginatedCameras = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredCameras.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredCameras, currentPage, itemsPerPage]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertCamera) => {
@@ -305,9 +275,7 @@ export default function CamerasManagement() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Câmeras</h1>
-          <p className="text-muted-foreground">
-            {filteredCameras.length} {filteredCameras.length === 1 ? "câmera" : "câmeras"}
-          </p>
+          <p className="text-muted-foreground">Gerenciar câmeras do sistema</p>
         </div>
         <Button onClick={() => setIsDialogOpen(true)} data-testid="button-add-camera">
           <Plus className="h-4 w-4 mr-2" />
@@ -315,40 +283,8 @@ export default function CamerasManagement() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome, localização ou URL..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pl-9"
-            data-testid="input-search-cameras"
-          />
-        </div>
-        <Select
-          value={itemsPerPage.toString()}
-          onValueChange={(value) => {
-            setItemsPerPage(parseInt(value));
-            setCurrentPage(1);
-          }}
-        >
-          <SelectTrigger className="w-[140px]" data-testid="select-items-per-page">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="12">12 por página</SelectItem>
-            <SelectItem value="24">24 por página</SelectItem>
-            <SelectItem value="48">48 por página</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {paginatedCameras.map((camera) => (
+        {cameras?.map((camera) => (
           <Card 
             key={camera.id} 
             className="hover-elevate cursor-pointer" 
@@ -440,54 +376,20 @@ export default function CamerasManagement() {
         ))}
       </div>
 
-      {filteredCameras.length === 0 && (
+      {cameras?.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Video className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {searchTerm ? "Nenhuma câmera encontrada" : "Nenhuma câmera cadastrada"}
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">Nenhuma câmera cadastrada</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {searchTerm ? "Tente ajustar sua busca" : "Comece criando sua primeira câmera"}
+              Comece criando sua primeira câmera
             </p>
-            {!searchTerm && (
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Câmera
-              </Button>
-            )}
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Câmera
+            </Button>
           </CardContent>
         </Card>
-      )}
-
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                  className="cursor-pointer"
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
