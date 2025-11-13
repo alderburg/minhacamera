@@ -18,7 +18,7 @@ export default function MobileCameraView() {
   }, []);
 
   const { data: camera, isLoading } = useQuery<Camera>({
-    queryKey: ["/api/cameras", cameraId],
+    queryKey: [`/api/cameras/${cameraId}`],
     enabled: !!cameraId,
     refetchInterval: 15000,
   });
