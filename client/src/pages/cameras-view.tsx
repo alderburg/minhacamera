@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,12 @@ import type { Camera } from "@shared/schema";
 type GridLayout = "2x2" | "3x3" | "4x4";
 
 export default function CamerasView() {
-  const { user, isLoading: authLoading } = useRequireAuth();
+  const { user, isLoading: authLoading } = useRequireAuth(["user"]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [gridLayout, setGridLayout] = useState<GridLayout>("2x2");
   const [fullscreenCamera, setFullscreenCamera] = useState<Camera | null>(null);
 

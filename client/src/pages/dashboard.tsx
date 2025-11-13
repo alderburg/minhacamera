@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,10 @@ export default function Dashboard() {
     queryKey: ["/api/dashboard/stats"],
     enabled: !!user,
   });
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (authLoading || isLoading) {
     return (

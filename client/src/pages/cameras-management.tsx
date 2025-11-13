@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -40,6 +40,11 @@ import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
 
 export default function CamerasManagement() {
   const { user, isLoading: authLoading } = useRequireAuth(["super_admin", "admin"]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAccessDialogOpen, setIsAccessDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

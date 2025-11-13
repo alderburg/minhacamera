@@ -38,6 +38,11 @@ import type { Empresa, InsertEmpresa } from "@shared/schema";
 
 export default function Empresas() {
   const { user, isLoading: authLoading } = useRequireAuth(["super_admin"]);
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
