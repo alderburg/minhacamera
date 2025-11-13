@@ -46,7 +46,7 @@ export default function MobileClienteForm() {
   }, []);
 
   useEffect(() => {
-    if (cliente) {
+    if (cliente && clienteId) {
       setFormData({
         nome: cliente.nome,
         email: cliente.email || "",
@@ -55,7 +55,24 @@ export default function MobileClienteForm() {
         ativo: cliente.ativo,
       });
     }
-  }, [cliente]);
+  }, [cliente, clienteId]);
+
+  if (isEditing && isLoadingCliente) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-16">
+        <MobileTopBar
+          showBack
+          backUrl="/mobile/clientes"
+          title="Carregando..."
+          subtitle="Aguarde..."
+        />
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+        <MobileBottomNav />
+      </div>
+    );
+  }
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertCliente) => {

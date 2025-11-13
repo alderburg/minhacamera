@@ -36,7 +36,7 @@ export default function MobileEmpresaForm() {
   }, []);
 
   useEffect(() => {
-    if (empresa) {
+    if (empresa && empresaId) {
       setFormData({
         nome: empresa.nome,
         logo: empresa.logo || "",
@@ -44,7 +44,24 @@ export default function MobileEmpresaForm() {
         ativo: empresa.ativo,
       });
     }
-  }, [empresa]);
+  }, [empresa, empresaId]);
+
+  if (isEditing && isLoadingEmpresa) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-16">
+        <MobileTopBar
+          showBack
+          backUrl="/mobile/empresas"
+          title="Carregando..."
+          subtitle="Aguarde..."
+        />
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+        <MobileBottomNav />
+      </div>
+    );
+  }
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertEmpresa) => {

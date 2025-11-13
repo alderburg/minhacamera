@@ -48,7 +48,7 @@ export default function MobileCameraForm() {
   }, []);
 
   useEffect(() => {
-    if (camera) {
+    if (camera && cameraId) {
       setFormData({
         nome: camera.nome,
         urlRtsp: camera.urlRtsp,
@@ -59,7 +59,24 @@ export default function MobileCameraForm() {
         resolucaoPreferida: camera.resolucaoPreferida || "720p",
       });
     }
-  }, [camera]);
+  }, [camera, cameraId]);
+
+  if (isEditing && isLoadingCamera) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-16">
+        <MobileTopBar
+          showBack
+          backUrl="/mobile/cameras"
+          title="Carregando..."
+          subtitle="Aguarde..."
+        />
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+        <MobileBottomNav />
+      </div>
+    );
+  }
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertCamera) => {
