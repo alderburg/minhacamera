@@ -69,8 +69,7 @@ export default function Clientes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clientes"] });
       setIsDialogOpen(false);
-      setEditingCliente(null);
-      setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
+      resetForm();
       toast({
         title: editingCliente ? "Cliente atualizado" : "Cliente criado",
         description: editingCliente ? "O cliente foi atualizado com sucesso" : "O cliente foi criado com sucesso",
@@ -174,12 +173,16 @@ export default function Clientes() {
     }
   };
 
+  const resetForm = () => {
+    setEditingCliente(null);
+    setSelectedEmpresa(null);
+    setEmpresaSearchTerm("");
+    setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
+  };
+
   const handleDialogClose = (open: boolean) => {
     if (!open) {
-      setEditingCliente(null);
-      setSelectedEmpresa(null);
-      setEmpresaSearchTerm("");
-      setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
+      resetForm();
     }
     setIsDialogOpen(open);
   };
@@ -194,10 +197,7 @@ export default function Clientes() {
   };
 
   const handleNewCliente = () => {
-    setEditingCliente(null);
-    setSelectedEmpresa(null);
-    setEmpresaSearchTerm("");
-    setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
+    resetForm();
     setIsDialogOpen(true);
   };
 
@@ -408,7 +408,10 @@ export default function Clientes() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsDialogOpen(false)}
+                onClick={() => {
+                  setIsDialogOpen(false);
+                  resetForm();
+                }}
               >
                 Cancelar
               </Button>
