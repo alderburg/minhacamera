@@ -510,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: `Cliente ${clienteId} não encontrado` });
         }
         if (cliente.empresaId !== camera.empresaId) {
-          return res.status(403).json({ message: "Cliente deve pertencer à mesma empresa da câmera" });
+          return res.status(403).json({ message: "Este cliente precisa estar vinculado a mesma empresa de cadastro da câmera" });
         }
       }
 
