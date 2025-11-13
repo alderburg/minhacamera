@@ -2,8 +2,13 @@ import { MobileTopBar } from "@/components/mobile-top-bar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Settings, Moon, Globe, Shield, HelpCircle, ChevronRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useEffect } from "react";
 
 export default function MobileConfiguracoes() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar 

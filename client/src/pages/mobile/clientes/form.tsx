@@ -23,6 +23,10 @@ export default function MobileClienteForm() {
   const isEditing = !!clienteId;
   const isSuperAdmin = user?.tipo === "super_admin";
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [formData, setFormData] = useState<InsertCliente>({
     nome: "",
     email: "",

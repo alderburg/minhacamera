@@ -19,6 +19,10 @@ export default function MobileEmpresaForm() {
   const empresaId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!empresaId;
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [formData, setFormData] = useState<InsertEmpresa>({
     nome: "",
     logo: "",
@@ -100,8 +104,8 @@ export default function MobileEmpresaForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
-      <MobileTopBar 
-        showBack 
+      <MobileTopBar
+        showBack
         backUrl="/mobile/empresas"
         title={isEditing ? "Editar Empresa" : "Nova Empresa"}
         subtitle={isEditing ? "Atualize os dados da empresa" : "Preencha os dados abaixo"}

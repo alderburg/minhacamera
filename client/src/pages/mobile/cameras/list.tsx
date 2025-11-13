@@ -6,11 +6,15 @@ import { Plus, Search, Video, MapPin, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Camera } from "@shared/schema";
 
 export default function MobileCamerasList() {
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { data: cameras, isLoading } = useQuery<Camera[]>({
     queryKey: ["/api/cameras"],

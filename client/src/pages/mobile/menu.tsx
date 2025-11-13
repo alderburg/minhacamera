@@ -14,9 +14,14 @@ import {
   ChevronRight,
   Shield
 } from "lucide-react";
+import { useEffect } from "react";
 
 export default function MobileMenu() {
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!user) return null;
 

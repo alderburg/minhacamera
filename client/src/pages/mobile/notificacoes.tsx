@@ -2,8 +2,13 @@ import { MobileTopBar } from "@/components/mobile-top-bar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 export default function MobileNotificacoes() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const notifications = [
     {
       id: 1,

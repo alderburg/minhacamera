@@ -5,11 +5,15 @@ import { Link } from "wouter";
 import { Plus, Search, Building2, CheckCircle2, XCircle, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Empresa } from "@shared/schema";
 
 export default function MobileEmpresasList() {
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { data: empresas, isLoading } = useQuery<Empresa[]>({
     queryKey: ["/api/empresas"],

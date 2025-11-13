@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, Users, Video, Activity } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useEffect } from "react";
 
 interface DashboardStats {
   totalEmpresas: number;
@@ -15,6 +16,10 @@ interface DashboardStats {
 
 export default function MobileHome() {
   const { user } = useAuth();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],

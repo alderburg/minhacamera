@@ -6,11 +6,15 @@ import { Plus, Search, Users, Mail, Phone, Pencil, CheckCircle2, XCircle } from 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Cliente } from "@shared/schema";
 
 export default function MobileClientesList() {
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { data: clientes, isLoading } = useQuery<Cliente[]>({
     queryKey: ["/api/clientes"],
