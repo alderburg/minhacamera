@@ -322,7 +322,11 @@ export default function Clientes() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => handleEdit(cliente)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleEdit(cliente);
+                        }}
                         data-testid={`button-edit-cliente-${cliente.id}`}
                       >
                         <Pencil className="h-4 w-4" />

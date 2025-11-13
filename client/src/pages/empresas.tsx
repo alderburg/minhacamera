@@ -310,7 +310,11 @@ export default function Empresas() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => handleEdit(empresa)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleEdit(empresa);
+                        }}
                         data-testid={`button-edit-empresa-${empresa.id}`}
                       >
                         <Pencil className="h-4 w-4" />

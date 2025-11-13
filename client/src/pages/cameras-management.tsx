@@ -197,15 +197,19 @@ export default function CamerasManagement() {
   };
 
   const handleEdit = (camera: Camera) => {
+    // Prevenir comportamento padrão
     setEditingCamera(camera);
 
     // Buscar e definir a empresa selecionada
-    const empresa = empresas?.find(e => e.id === camera.empresaId);
-    if (empresa) {
-      setSelectedEmpresa(empresa);
-      setEmpresaSearchTerm(empresa.nome);
+    if (isSuperAdmin && empresas) {
+      const empresa = empresas.find(e => e.id === camera.empresaId);
+      if (empresa) {
+        setSelectedEmpresa(empresa);
+        setEmpresaSearchTerm(empresa.nome);
+      }
     }
 
+    // Atualizar formulário
     setFormData({
       nome: camera.nome,
       protocolo: camera.protocolo || "RTSP",
@@ -226,6 +230,8 @@ export default function CamerasManagement() {
       diasGravacao: camera.diasGravacao || 7,
       resolucaoPreferida: camera.resolucaoPreferida || "720p",
     });
+    
+    // Abrir diálogo
     setIsDialogOpen(true);
   };
 
@@ -508,6 +514,7 @@ export default function CamerasManagement() {
                     size="icon"
                     className="h-8 w-8"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleEdit(camera);
                     }}
