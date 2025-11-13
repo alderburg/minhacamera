@@ -177,7 +177,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
               <NotificationBell />
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-6 md:p-8">
+          <main className="flex-1 overflow-auto md:p-8">
             {children}
           </main>
         </div>
