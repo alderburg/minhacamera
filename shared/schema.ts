@@ -111,7 +111,7 @@ export const insertUserSchema = createInsertSchema(users, {
   email: z.string().email("Email inválido"),
   senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
   tipo: z.enum(["super_admin", "admin", "user"]),
-  ativo: z.boolean().default(true),
+  ativo: z.boolean().optional(),
 }).omit({
   id: true,
 });
@@ -126,7 +126,7 @@ export const loginSchema = z.object({
 // Empresa schemas
 export const insertEmpresaSchema = createInsertSchema(empresas, {
   nome: z.string().min(1, "Nome da empresa é obrigatório"),
-  ativo: z.boolean().default(true),
+  ativo: z.boolean().optional(),
 }).omit({
   id: true,
 });
@@ -138,7 +138,7 @@ export const insertClienteSchema = createInsertSchema(clientes, {
   nome: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
-  ativo: z.boolean().default(true),
+  ativo: z.boolean().optional(),
 }).omit({
   id: true,
 });
@@ -150,7 +150,7 @@ export const insertCameraSchema = createInsertSchema(cameras, {
   nome: z.string().min(1, "Nome da câmera é obrigatório"),
   urlRtsp: z.string().min(1, "URL RTSP é obrigatória"),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
-  ativa: z.boolean().default(true),
+  ativa: z.boolean().optional(),
 }).omit({
   id: true,
 });
