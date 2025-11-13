@@ -6,8 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { MobileNav } from "@/components/mobile-nav";
-import { MobileHeader } from "@/components/mobile-header";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
@@ -17,6 +16,16 @@ import CamerasManagement from "@/pages/cameras-management";
 import CamerasView from "@/pages/cameras-view";
 import Perfil from "@/pages/perfil";
 import Notificacoes from "@/pages/notificacoes";
+import MobileHome from "@/pages/mobile/home";
+import MobileMenu from "@/pages/mobile/menu";
+import MobileEmpresasList from "@/pages/mobile/empresas/list";
+import MobileEmpresaForm from "@/pages/mobile/empresas/form";
+import MobileClientesList from "@/pages/mobile/clientes/list";
+import MobileClienteForm from "@/pages/mobile/clientes/form";
+import MobileCamerasList from "@/pages/mobile/cameras/list";
+import MobileCameraForm from "@/pages/mobile/cameras/form";
+import MobileNotificacoes from "@/pages/mobile/notificacoes";
+import MobileConfiguracoes from "@/pages/mobile/configuracoes";
 import { Loader2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -156,24 +165,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!user) return <>{children}</>;
 
-  const isUser = user.tipo === "user";
-
-  // Mobile-only layout for users
-  if (isUser) {
-    return (
-      <>
-        <MobileHeader>
-          <NotificationBell />
-        </MobileHeader>
-        <main className="pt-14 pb-16 md:pt-0 md:pb-0 min-h-screen">
-          <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">{children}</div>
-        </main>
-        <MobileNav />
-      </>
-    );
-  }
-
-  // Desktop sidebar + mobile nav for admins
+  // Desktop sidebar for admins only
   const sidebarStyle = {
     "--sidebar-width": "16rem",
   };
@@ -189,12 +181,11 @@ function AppLayout({ children }: { children: React.ReactNode }) {
               <NotificationBell />
             </div>
           </header>
-          <main className="flex-1 overflow-auto pb-16 md:pb-0">
-            <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">{children}</div>
+          <main className="flex-1 overflow-auto">
+            {children}
           </main>
         </div>
       </div>
-      <MobileNav />
     </SidebarProvider>
   );
 }
@@ -206,6 +197,60 @@ function Router() {
         <PublicRoute component={Login} />
       </Route>
 
+      {/* Mobile Routes */}
+      <Route path="/mobile/home">
+        <ProtectedRoute component={MobileHome} />
+      </Route>
+
+      <Route path="/mobile/menu">
+        <ProtectedRoute component={MobileMenu} />
+      </Route>
+
+      <Route path="/mobile/empresas" exact>
+        <ProtectedRoute component={MobileEmpresasList} />
+      </Route>
+
+      <Route path="/mobile/empresas/new">
+        <ProtectedRoute component={MobileEmpresaForm} />
+      </Route>
+
+      <Route path="/mobile/empresas/edit/:id">
+        <ProtectedRoute component={MobileEmpresaForm} />
+      </Route>
+
+      <Route path="/mobile/clientes" exact>
+        <ProtectedRoute component={MobileClientesList} />
+      </Route>
+
+      <Route path="/mobile/clientes/new">
+        <ProtectedRoute component={MobileClienteForm} />
+      </Route>
+
+      <Route path="/mobile/clientes/edit/:id">
+        <ProtectedRoute component={MobileClienteForm} />
+      </Route>
+
+      <Route path="/mobile/cameras" exact>
+        <ProtectedRoute component={MobileCamerasList} />
+      </Route>
+
+      <Route path="/mobile/cameras/new">
+        <ProtectedRoute component={MobileCameraForm} />
+      </Route>
+
+      <Route path="/mobile/cameras/edit/:id">
+        <ProtectedRoute component={MobileCameraForm} />
+      </Route>
+
+      <Route path="/mobile/notificacoes">
+        <ProtectedRoute component={MobileNotificacoes} />
+      </Route>
+
+      <Route path="/mobile/configuracoes">
+        <ProtectedRoute component={MobileConfiguracoes} />
+      </Route>
+
+      {/* Desktop Routes */}
       <Route path="/dashboard">
         <ProtectedRoute component={Dashboard} />
       </Route>
@@ -239,7 +284,7 @@ function Router() {
       </Route>
 
       <Route path="/">
-        <Redirect to="/login" />
+        <Redirect to="/mobile/home" />
       </Route>
 
       <Route component={NotFound} />
