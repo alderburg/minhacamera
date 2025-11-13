@@ -101,14 +101,14 @@ export default function MobileCameraForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
-      <MobileTopBar 
-        showBack 
+      <MobileTopBar
+        showBack
         backUrl="/mobile/cameras"
         title={isEditing ? "Editar Câmera" : "Nova Câmera"}
         subtitle={isEditing ? "Atualize os dados da câmera" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="pt-20 px-0 pb-6 md:px-4 md:pt-0">
+      <form onSubmit={handleSubmit} className="p-4 pt-20 space-y-4">
         <div className="px-4">
         <div className="space-y-4">
           <div className="bg-white rounded-xl p-4 border border-gray-100">

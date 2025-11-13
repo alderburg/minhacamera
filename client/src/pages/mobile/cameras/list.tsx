@@ -72,8 +72,8 @@ export default function MobileCamerasList() {
         }
       />
 
-      <div className="pt-16 px-0 md:px-4">
-        <div className="mb-4 px-4">
+      <div className="p-4 pt-20 space-y-4">
+        <div className="mb-4 px-0 md:px-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
@@ -106,7 +106,7 @@ export default function MobileCamerasList() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3 px-4">
+          <div className="space-y-3 px-0 md:px-0">
             {filteredCameras.map((camera) => (
               <div key={camera.id} className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:bg-gray-50 transition-colors">
                 <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">

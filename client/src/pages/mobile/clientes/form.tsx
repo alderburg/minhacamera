@@ -96,8 +96,8 @@ export default function MobileClienteForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
-      <MobileTopBar 
-        showBack 
+      <MobileTopBar
+        showBack
         backUrl="/mobile/clientes"
         title={isEditing ? "Editar Cliente" : "Novo Cliente"}
         subtitle={isEditing ? "Atualize os dados do cliente" : "Preencha os dados abaixo"}

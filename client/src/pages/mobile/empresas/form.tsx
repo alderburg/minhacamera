@@ -84,7 +84,7 @@ export default function MobileEmpresaForm() {
         subtitle={isEditing ? "Atualize os dados da empresa" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="pt-16 px-0 pb-6 md:px-4 md:pt-0">
+      <form onSubmit={handleSubmit} className="p-4 pt-20 space-y-4">
         <div className="px-4">
         <div className="space-y-4">
           <div className="bg-white rounded-xl p-4 border border-gray-100">
