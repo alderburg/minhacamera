@@ -13,6 +13,9 @@ import {
   batchCameraAcessoSchema,
   insertUserSchema,
 } from "@shared/schema";
+import { startCameraStream, stopCameraStream, getStreamPath, getStreamDir } from './streaming';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 const JWT_SECRET = process.env.SESSION_SECRET || "your-secret-key-change-in-production";
 
@@ -436,10 +439,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== STREAM ENDPOINTS ====================
-  
-  import { startCameraStream, stopCameraStream, getStreamPath, getStreamDir } from './streaming';
-  import { existsSync } from 'fs';
-  import { join } from 'path';
 
   // Inicia o stream de uma câmera
   app.post("/api/stream/:cameraId/start", authenticateToken, async (req: AuthRequest, res) => {
