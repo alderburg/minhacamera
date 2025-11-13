@@ -169,7 +169,16 @@ export default function CamerasManagement() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    
+    // Normalize numeric fields to avoid empty string issues
+    const normalizedData = {
+      ...formData,
+      porta: formData.porta || undefined,
+      onvifPort: formData.onvifPort || undefined,
+      diasGravacao: formData.diasGravacao || 7,
+    };
+    
+    createMutation.mutate(normalizedData);
   };
 
   const handleEdit = (camera: Camera) => {
@@ -677,7 +686,6 @@ export default function CamerasManagement() {
                     placeholder="rtsp://usuario:senha@192.168.1.100:554/stream"
                     value={formData.urlConexao}
                     onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
-                    required
                     className="font-mono text-sm"
                     data-testid="input-url-conexao"
                   />
@@ -707,7 +715,6 @@ export default function CamerasManagement() {
                       value={formData.ip}
                       onChange={(e) => setFormData({ ...formData, ip: e.target.value })}
                       placeholder="192.168.1.100"
-                      required
                       className="font-mono"
                       data-testid="input-ip"
                     />
@@ -771,7 +778,6 @@ export default function CamerasManagement() {
                     value={formData.p2pId}
                     onChange={(e) => setFormData({ ...formData, p2pId: e.target.value })}
                     placeholder="XXXX-XXXX-XXXX-XXXX"
-                    required
                     className="font-mono"
                     data-testid="input-p2p-id"
                   />
@@ -806,7 +812,6 @@ export default function CamerasManagement() {
                         ? "rtmp://servidor/live/stream"
                         : "http://192.168.1.100/video.cgi"
                     }
-                    required
                     className="font-mono text-sm"
                     data-testid="input-url-conexao"
                   />

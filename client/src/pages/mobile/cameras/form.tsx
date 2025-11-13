@@ -166,7 +166,16 @@ export default function MobileCameraForm() {
       });
       return;
     }
-    saveMutation.mutate(formData);
+    
+    // Normalize numeric fields to avoid empty string issues
+    const normalizedData = {
+      ...formData,
+      porta: formData.porta || undefined,
+      onvifPort: formData.onvifPort || undefined,
+      diasGravacao: formData.diasGravacao || 7,
+    };
+    
+    saveMutation.mutate(normalizedData);
   };
 
   const getProtocolHelp = () => {
@@ -252,7 +261,6 @@ export default function MobileCameraForm() {
                   value={formData.urlConexao}
                   onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
                   placeholder="rtsp://usuario:senha@192.168.1.100:554/stream"
-                  required
                   className="h-12 bg-white font-mono text-sm"
                   data-testid="input-url-conexao"
                 />
@@ -285,7 +293,6 @@ export default function MobileCameraForm() {
                   value={formData.ip}
                   onChange={(e) => setFormData({ ...formData, ip: e.target.value })}
                   placeholder="192.168.1.100"
-                  required
                   className="h-12 bg-white font-mono"
                   data-testid="input-ip"
                 />
@@ -362,7 +369,6 @@ export default function MobileCameraForm() {
                   value={formData.p2pId}
                   onChange={(e) => setFormData({ ...formData, p2pId: e.target.value })}
                   placeholder="XXXX-XXXX-XXXX-XXXX"
-                  required
                   className="h-12 bg-white font-mono"
                   data-testid="input-p2p-id"
                 />
@@ -402,7 +408,6 @@ export default function MobileCameraForm() {
                       ? "rtmp://servidor/live/stream"
                       : "http://192.168.1.100/video.cgi"
                   }
-                  required
                   className="h-12 bg-white font-mono text-sm"
                   data-testid="input-url-conexao"
                 />

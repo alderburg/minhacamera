@@ -296,15 +296,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cameras", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
-      const cameraData = insertCameraSchema.parse(req.body);
-
-      // If admin (not super_admin), force empresaId to their own company
+      
+      // If admin (not super_admin), inject empresaId before validation
       if (user.tipo === "admin") {
         if (!user.empresaId) {
           return res.status(403).json({ message: "Admin sem empresa associada" });
         }
-        cameraData.empresaId = user.empresaId;
+        req.body.empresaId = user.empresaId;
       }
+      
+      const cameraData = insertCameraSchema.parse(req.body);
 
       // Validate empresa exists
       const empresa = await storage.getEmpresa(cameraData.empresaId);
@@ -324,7 +325,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user!;
       const id = parseInt(req.params.id);
-      const cameraData = insertCameraSchema.parse(req.body);
 
       // Verify camera exists
       const existingCamera = await storage.getCamera(id);
@@ -332,13 +332,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Câmera não encontrada" });
       }
 
-      // If admin, verify camera belongs to their company
+      // If admin, verify camera belongs to their company and inject empresaId before validation
       if (user.tipo === "admin") {
         if (!user.empresaId || existingCamera.empresaId !== user.empresaId) {
           return res.status(403).json({ message: "Sem permissão para editar esta câmera" });
         }
-        cameraData.empresaId = user.empresaId;
+        req.body.empresaId = user.empresaId;
       }
+      
+      const cameraData = insertCameraSchema.parse(req.body);
 
       const camera = await storage.updateCamera(id, cameraData);
       res.json(camera);
