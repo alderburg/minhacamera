@@ -1,0 +1,181 @@
+Sistema: MinhaCamera.com – Fase 1 (Visualização ao vivo)
+
+Crie um sistema completo chamado MinhaCamera.com, um painel de gerenciamento e visualização de câmeras IP com suporte white label, permitindo cadastrar empresas, clientes e câmeras, com diferentes níveis de acesso (super admin, admin e usuário comum).
+Nesta primeira fase, o sistema não grava vídeos, apenas exibe câmeras em tempo real (RTSP/RTSC), com estrutura preparada para futura implementação de gravação e compressão local.
+
+⚙️ TECNOLOGIAS RECOMENDADAS
+
+Frontend: React + TypeScript + Tailwind CSS + Shadcn/UI + React Query + Wouter (ou React Router)
+
+Backend: Node.js + Express + Drizzle ORM + PostgreSQL
+
+Streaming: Conexão via RTSP → HLS (convertido com FFmpeg no servidor)
+
+Autenticação: JWT (JSON Web Token)
+
+Hospedagem: Local ou servidor próprio (sem dependência de nuvem)
+
+🧩 FUNCIONALIDADES PRINCIPAIS
+🔐 Autenticação e Acessos
+
+Login/logout com controle por papéis (super admin, admin, usuário).
+
+Redirecionamento automático conforme o nível de acesso.
+
+Middleware no backend valida permissões e empresa vinculada.
+
+🧑‍💼 Níveis de Usuário
+
+Super Admin
+
+Pode cadastrar empresas.
+
+Pode cadastrar clientes e câmeras para qualquer empresa.
+
+Pode visualizar todas as câmeras do sistema.
+
+Admin (empresa)
+
+Pode cadastrar clientes e câmeras da sua empresa.
+
+Pode atribuir câmeras a clientes específicos.
+
+Pode visualizar apenas câmeras da sua empresa.
+
+Usuário (cliente final)
+
+Pode apenas visualizar câmeras liberadas para ele.
+
+Interface tipo aplicativo com topbar e menu inferior.
+
+💾 BANCO DE DADOS (estrutura inicial)
+
+Tabelas:
+
+users
+id, nome, email, senha, tipo (super_admin | admin | user), empresa_id (nullable)
+
+empresas
+id, nome, logo, dominio, ativo
+
+clientes
+id, nome, email, telefone, empresa_id, ativo
+
+cameras
+id, nome, url_rtsp, empresa_id, ativa
+
+camera_acessos
+id, camera_id, cliente_id
+
+🎥 VISUALIZAÇÃO DE CÂMERAS AO VIVO
+
+Conversão de RTSP → HLS (ou WebRTC) usando FFmpeg no servidor.
+
+Endpoint /api/stream/:cameraId gera o stream ao vivo em HLS.
+
+Player de vídeo no frontend (React Player ou hls.js).
+
+Status da câmera (online/offline) detectado automaticamente.
+
+Exibição em grade ou lista (ex: 2x2, 3x3).
+
+Função de expandir câmera em tela cheia.
+
+Layout responsivo (desktop e mobile).
+
+🖥️ INTERFACE – DESKTOP
+
+Sidebar lateral com menus:
+
+Dashboard
+
+Empresas (somente para super admin)
+
+Clientes
+
+Câmeras
+
+Configurações
+
+Páginas principais:
+
+/login
+
+/dashboard
+
+/empresas
+
+/clientes
+
+/cameras
+
+/visualizacao
+
+Dashboard mostra estatísticas simples (total de câmeras, online/offline).
+
+📱 INTERFACE – MOBILE (App-like)
+
+Layout com:
+
+Topbar: mostra logo e nome da empresa.
+
+Menu inferior: ícones “Início”, “Câmeras”, “Perfil”.
+
+Acesso rápido às câmeras liberadas.
+
+Visualização em tela cheia.
+
+Responsividade completa via Tailwind.
+
+Preparado para ser convertido em PWA (instalável como app).
+
+⚙️ ESTRUTURA DE PASTAS SUGERIDA
+/frontend
+  /src
+    /components
+    /pages
+    /routes
+    /hooks
+    /services
+    /styles
+/backend
+  /src
+    /routes
+    /controllers
+    /models
+    /middlewares
+    /services
+
+🧰 FUNÇÕES EXTRA (PREPARADAS PARA FUTURA EXPANSÃO)
+
+Campos nas câmeras já incluem:
+
+dias_gravacao (para uso futuro)
+
+resolucao_preferida (para compressão futura)
+
+API já estruturada para:
+
+/api/gravacoes (a ser implementada depois)
+
+/api/compressao (para FFmpeg)
+
+Cronjob preparado mas desativado (para apagar vídeos antigos quando a gravação estiver ativa).
+
+🧱 REQUISITOS FUTUROS (para próxima fase – gravação local)
+
+Implementar módulo de gravação contínua no servidor.
+
+Compressão automática com FFmpeg.
+
+Definir tempo de retenção (ex: 7 dias).
+
+Armazenamento local organizado por /empresa_id/camera_id/data.mp4.
+
+Linha do tempo para playback no app.
+
+Captura de imagem (snapshot) e download.
+
+🚀 OBJETIVO FINAL
+
+Criar um sistema SaaS white label de monitoramento de câmeras IP, iniciando com a visualização ao vivo via RTSP/HLS, com estrutura escalável para futura gravação, compressão e armazenamento local — acessível via web e mobile app.
