@@ -41,6 +41,7 @@ import { useWebSocket } from "@/hooks/use-websocket";
 
 function ProtectedRoute({ component: Component, ...rest }: any) {
   const { user, isLoading } = useAuth();
+  const [location] = useLocation();
 
   if (isLoading) {
     return (
@@ -50,8 +51,12 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
     );
   }
 
-  if (!user) {
+  if (!user && location !== "/login") {
     return <Redirect to="/login" />;
+  }
+
+  if (!user) {
+    return null;
   }
 
   return <Component {...rest} />;
@@ -59,6 +64,7 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
 
 function PublicRoute({ component: Component, ...rest }: any) {
   const { user, isLoading } = useAuth();
+  const [location] = useLocation();
 
   if (isLoading) {
     return (
@@ -68,9 +74,12 @@ function PublicRoute({ component: Component, ...rest }: any) {
     );
   }
 
-  if (user) {
-    // Always redirect to dashboard
+  if (user && location === "/login") {
     return <Redirect to="/dashboard" />;
+  }
+
+  if (user) {
+    return null;
   }
 
   return <Component {...rest} />;
@@ -205,6 +214,7 @@ function Router() {
       <Route path="/">
         {() => {
           const { user, isLoading } = useAuth();
+          const [location] = useLocation();
 
           if (isLoading) {
             return (
@@ -214,12 +224,15 @@ function Router() {
             );
           }
 
-          if (!user) {
+          if (!user && location === "/") {
             return <Redirect to="/login" />;
           }
 
-          // Always redirect to dashboard
-          return <Redirect to="/dashboard" />;
+          if (user && location === "/") {
+            return <Redirect to="/dashboard" />;
+          }
+
+          return null;
         }}
       </Route>
 

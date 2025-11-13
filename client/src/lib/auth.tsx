@@ -16,8 +16,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [, setLocation] = useLocation();
+  const [isChecking, setIsChecking] = useState(false);
 
   const checkAuth = async () => {
+    if (isChecking) return;
+    
+    setIsChecking(true);
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include",
@@ -33,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     } finally {
       setIsLoading(false);
+      setIsChecking(false);
     }
   };
 
