@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -9,6 +10,7 @@ declare module 'http' {
     rawBody: unknown
   }
 }
+app.use(cookieParser());
 app.use(express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;

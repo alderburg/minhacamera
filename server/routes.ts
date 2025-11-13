@@ -17,8 +17,6 @@ import {
 const JWT_SECRET = process.env.SESSION_SECRET || "your-secret-key-change-in-production";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  app.use(cookieParser());
-
   // Health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });

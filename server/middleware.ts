@@ -9,17 +9,25 @@ export interface AuthRequest extends Request {
 }
 
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
-  const token = req.cookies.token;
+  const token = req.cookies?.token;
 
   if (!token) {
+    console.log('No token found in cookies:', req.cookies);
     return res.status(401).json({ message: "Não autenticado" });
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as User;
-    req.user = decoded;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      tipo: decoded.tipo,
+      empresaId: decoded.empresaId,
+      clienteId: decoded.clienteId
+    } as User;
     next();
   } catch (error) {
+    console.log('Token verification failed:', error);
     return res.status(403).json({ message: "Token inválido" });
   }
 }
