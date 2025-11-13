@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users, Search, Building2 } from "lucide-react";
+import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users, Search, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import { CameraPlayer } from "@/components/camera-player";
@@ -51,6 +51,8 @@ export default function CamerasManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [empresaSearchTerm, setEmpresaSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
     urlRtsp: "",
@@ -278,6 +280,23 @@ export default function CamerasManagement() {
     setIsDialogOpen(true);
   };
 
+  // Paginação
+  const totalItems = cameras?.length || 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCameras = cameras?.slice(startIndex, endIndex) || [];
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+  };
+
   if (fullscreenCamera) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
@@ -319,7 +338,7 @@ export default function CamerasManagement() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cameras?.map((camera) => (
+        {currentCameras.map((camera) => (
           <Card 
             key={camera.id} 
             className="hover-elevate cursor-pointer" 
@@ -425,6 +444,52 @@ export default function CamerasManagement() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {totalItems > 0 && (
+        <div className="flex items-center justify-between border-t pt-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Itens por página:</span>
+            <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="12">12</SelectItem>
+                <SelectItem value="24">24</SelectItem>
+                <SelectItem value="48">48</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <span className="text-sm text-muted-foreground min-w-[60px] text-center">
+              {currentPage} / {totalPages}
+            </span>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="text-sm text-muted-foreground">
+            {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
+          </div>
+        </div>
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
