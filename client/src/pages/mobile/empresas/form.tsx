@@ -84,11 +84,10 @@ export default function MobileEmpresaForm() {
         subtitle={isEditing ? "Atualize os dados da empresa" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="p-4 pt-20 space-y-4">
-        <div className="px-4">
-        <div className="space-y-4">
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="nome" className="text-gray-700 font-semibold mb-2 block">
+      <form onSubmit={handleSubmit} className="p-4 pt-20 space-y-6">
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
               Nome da Empresa <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -97,12 +96,13 @@ export default function MobileEmpresaForm() {
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
               placeholder="Digite o nome da empresa"
               required
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-nome"
             />
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="dominio" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="dominio" className="text-sm font-medium text-gray-700">
               Domínio
             </Label>
             <Input
@@ -110,15 +110,16 @@ export default function MobileEmpresaForm() {
               value={formData.dominio}
               onChange={(e) => setFormData({ ...formData, dominio: e.target.value })}
               placeholder="exemplo.com.br"
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-dominio"
             />
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground">
               URL personalizada para acesso da empresa
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="logo" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="logo" className="text-sm font-medium text-gray-700">
               URL da Logo
             </Label>
             <Input
@@ -126,17 +127,18 @@ export default function MobileEmpresaForm() {
               value={formData.logo}
               onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
               placeholder="https://exemplo.com/logo.png"
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-logo"
             />
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between bg-white rounded-md border p-4">
               <div>
-                <Label htmlFor="ativo" className="text-gray-700 font-semibold">
+                <Label htmlFor="ativo" className="text-sm font-medium text-gray-700">
                   Status Ativo
                 </Label>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Empresa ativa no sistema
                 </p>
               </div>
@@ -144,17 +146,18 @@ export default function MobileEmpresaForm() {
                 id="ativo"
                 checked={formData.ativo}
                 onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
+                data-testid="switch-ativo"
               />
             </div>
           </div>
         </div>
 
-        </div>
-        <div className="mt-6 px-4">
+        <div className="mt-8">
           <Button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-semibold"
             disabled={saveMutation.isPending}
+            data-testid="button-submit"
           >
             {saveMutation.isPending ? (
               <>

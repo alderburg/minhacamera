@@ -108,11 +108,10 @@ export default function MobileCameraForm() {
         subtitle={isEditing ? "Atualize os dados da câmera" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="p-4 pt-20 space-y-4">
-        <div className="px-4">
-        <div className="space-y-4">
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="nome" className="text-gray-700 font-semibold mb-2 block">
+      <form onSubmit={handleSubmit} className="p-4 pt-20 space-y-6">
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
               Nome da Câmera <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -121,12 +120,13 @@ export default function MobileCameraForm() {
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
               placeholder="Ex: Câmera Entrada Principal"
               required
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-nome"
             />
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="urlRtsp" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="urlRtsp" className="text-sm font-medium text-gray-700">
               URL RTSP <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -135,15 +135,16 @@ export default function MobileCameraForm() {
               onChange={(e) => setFormData({ ...formData, urlRtsp: e.target.value })}
               placeholder="rtsp://usuario:senha@ip:porta/stream"
               required
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-url-rtsp"
             />
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground">
               URL de streaming da câmera IP
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="localizacao" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="localizacao" className="text-sm font-medium text-gray-700">
               Localização
             </Label>
             <Input
@@ -151,20 +152,21 @@ export default function MobileCameraForm() {
               value={formData.localizacao}
               onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
               placeholder="Ex: Portaria Principal"
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-localizacao"
             />
           </div>
 
           {isSuperAdmin && empresas && (
-            <div className="bg-white rounded-xl p-4 border border-gray-100">
-              <Label htmlFor="empresaId" className="text-gray-700 font-semibold mb-2 block">
+            <div className="space-y-2">
+              <Label htmlFor="empresaId" className="text-sm font-medium text-gray-700">
                 Empresa <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={formData.empresaId?.toString()}
                 onValueChange={(value) => setFormData({ ...formData, empresaId: parseInt(value) })}
               >
-                <SelectTrigger className="bg-gray-50 border-gray-200">
+                <SelectTrigger className="h-12 bg-white" data-testid="select-empresa">
                   <SelectValue placeholder="Selecione uma empresa" />
                 </SelectTrigger>
                 <SelectContent>
@@ -178,15 +180,15 @@ export default function MobileCameraForm() {
             </div>
           )}
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="resolucaoPreferida" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="resolucaoPreferida" className="text-sm font-medium text-gray-700">
               Resolução
             </Label>
             <Select
               value={formData.resolucaoPreferida}
               onValueChange={(value) => setFormData({ ...formData, resolucaoPreferida: value })}
             >
-              <SelectTrigger className="bg-gray-50 border-gray-200">
+              <SelectTrigger className="h-12 bg-white" data-testid="select-resolucao">
                 <SelectValue placeholder="Selecione a resolução" />
               </SelectTrigger>
               <SelectContent>
@@ -198,8 +200,8 @@ export default function MobileCameraForm() {
             </Select>
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="diasGravacao" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="diasGravacao" className="text-sm font-medium text-gray-700">
               Dias de Gravação
             </Label>
             <Input
@@ -209,20 +211,21 @@ export default function MobileCameraForm() {
               max="365"
               value={formData.diasGravacao}
               onChange={(e) => setFormData({ ...formData, diasGravacao: parseInt(e.target.value) || 7 })}
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-dias-gravacao"
             />
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground">
               Período de retenção das gravações
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between bg-white rounded-md border p-4">
               <div>
-                <Label htmlFor="ativa" className="text-gray-700 font-semibold">
+                <Label htmlFor="ativa" className="text-sm font-medium text-gray-700">
                   Câmera Ativa
                 </Label>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Câmera disponível para visualização
                 </p>
               </div>
@@ -230,17 +233,18 @@ export default function MobileCameraForm() {
                 id="ativa"
                 checked={formData.ativa}
                 onCheckedChange={(checked) => setFormData({ ...formData, ativa: checked })}
+                data-testid="switch-ativa"
               />
             </div>
           </div>
         </div>
 
-        </div>
-        <div className="mt-6 px-4">
+        <div className="mt-8">
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white h-12 text-base font-semibold"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-semibold"
             disabled={saveMutation.isPending}
+            data-testid="button-submit"
           >
             {saveMutation.isPending ? (
               <>

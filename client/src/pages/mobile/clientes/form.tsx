@@ -103,11 +103,10 @@ export default function MobileClienteForm() {
         subtitle={isEditing ? "Atualize os dados do cliente" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="pt-20 px-0 pb-6 md:px-4 md:pt-0">
-        <div className="px-4">
-        <div className="space-y-4">
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="nome" className="text-gray-700 font-semibold mb-2 block">
+      <form onSubmit={handleSubmit} className="pt-20 px-4 pb-6 md:px-4 md:pt-0">
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
               Nome Completo <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -116,12 +115,13 @@ export default function MobileClienteForm() {
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
               placeholder="Digite o nome completo"
               required
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-nome"
             />
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="email" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
               E-mail
             </Label>
             <Input
@@ -130,12 +130,13 @@ export default function MobileClienteForm() {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="email@exemplo.com"
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-email"
             />
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <Label htmlFor="telefone" className="text-gray-700 font-semibold mb-2 block">
+          <div className="space-y-2">
+            <Label htmlFor="telefone" className="text-sm font-medium text-gray-700">
               Telefone
             </Label>
             <Input
@@ -143,20 +144,21 @@ export default function MobileClienteForm() {
               value={formData.telefone}
               onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
               placeholder="(00) 00000-0000"
-              className="bg-gray-50 border-gray-200"
+              className="h-12 bg-white"
+              data-testid="input-telefone"
             />
           </div>
 
           {isSuperAdmin && empresas && (
-            <div className="bg-white rounded-xl p-4 border border-gray-100">
-              <Label htmlFor="empresaId" className="text-gray-700 font-semibold mb-2 block">
+            <div className="space-y-2">
+              <Label htmlFor="empresaId" className="text-sm font-medium text-gray-700">
                 Empresa <span className="text-red-500">*</span>
               </Label>
               <Select
                 value={formData.empresaId?.toString()}
                 onValueChange={(value) => setFormData({ ...formData, empresaId: parseInt(value) })}
               >
-                <SelectTrigger className="bg-gray-50 border-gray-200">
+                <SelectTrigger className="h-12 bg-white" data-testid="select-empresa">
                   <SelectValue placeholder="Selecione uma empresa" />
                 </SelectTrigger>
                 <SelectContent>
@@ -170,13 +172,13 @@ export default function MobileClienteForm() {
             </div>
           )}
 
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between bg-white rounded-md border p-4">
               <div>
-                <Label htmlFor="ativo" className="text-gray-700 font-semibold">
+                <Label htmlFor="ativo" className="text-sm font-medium text-gray-700">
                   Status Ativo
                 </Label>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Cliente ativo no sistema
                 </p>
               </div>
@@ -184,17 +186,18 @@ export default function MobileClienteForm() {
                 id="ativo"
                 checked={formData.ativo}
                 onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
+                data-testid="switch-ativo"
               />
             </div>
           </div>
         </div>
 
-        </div>
-        <div className="mt-6 px-4">
+        <div className="mt-8">
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white h-12 text-base font-semibold"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-semibold"
             disabled={saveMutation.isPending}
+            data-testid="button-submit"
           >
             {saveMutation.isPending ? (
               <>
