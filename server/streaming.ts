@@ -13,13 +13,19 @@ const setFfmpegPath = async () => {
     if (ffmpegPath) {
       ffmpeg.setFfmpegPath(ffmpegPath);
       console.log('FFmpeg encontrado em:', ffmpegPath);
+      return true;
     }
   } catch (error) {
-    console.error('FFmpeg não encontrado no sistema');
+    console.error('FFmpeg não encontrado no sistema. Instale o FFmpeg para usar streaming de câmeras.');
+    return false;
   }
+  return false;
 };
 
-setFfmpegPath();
+let ffmpegAvailable = false;
+setFfmpegPath().then(available => {
+  ffmpegAvailable = available;
+});
 
 const mkdir = promisify(fs.mkdir);
 const rm = promisify(fs.rm);
@@ -34,6 +40,11 @@ interface StreamSession {
 const activeSessions = new Map<number, StreamSession>();
 
 export async function startCameraStream(cameraId: number, rtspUrl: string): Promise<string> {
+  // Verifica se FFmpeg está disponível
+  if (!ffmpegAvailable) {
+    throw new Error('FFmpeg não está instalado. Por favor, aguarde a instalação ou reinicie o aplicativo.');
+  }
+
   // Se já existe uma sessão ativa, retorna o caminho
   if (activeSessions.has(cameraId)) {
     return activeSessions.get(cameraId)!.playlistPath;
