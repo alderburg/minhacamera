@@ -63,6 +63,15 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Setup WebSocket BEFORE Vite - important for path handling
+  console.log('🔌 Setting up WebSocket server...');
+  try {
+    setupWebSocket(server);
+    console.log('✅ WebSocket server setup complete');
+  } catch (error) {
+    console.error('❌ Error setting up WebSocket:', error);
+  }
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
@@ -83,9 +92,6 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
-
-    // Setup WebSocket
-    setupWebSocket(server);
 
     // Start camera monitoring - check every 30 seconds
     startCameraMonitoring(30000);

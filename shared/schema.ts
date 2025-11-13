@@ -142,13 +142,14 @@ export const cameraAcessosRelations = relations(cameraAcessos, ({ one }) => ({
 // Zod schemas for validation
 
 // User schemas
-export const insertUserSchema = createInsertSchema(users, {
+export const insertUserSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
   senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
   tipo: z.enum(["super_admin", "admin", "user"]),
-}).omit({
-  id: true,
+  empresaId: z.number().int().optional(),
+  clienteId: z.number().int().optional(),
+  ativo: z.boolean().optional().default(true),
 });
 
 export const selectUserSchema = createSelectSchema(users);
@@ -159,31 +160,31 @@ export const loginSchema = z.object({
 });
 
 // Empresa schemas
-export const insertEmpresaSchema = createInsertSchema(empresas, {
+export const insertEmpresaSchema = z.object({
   nome: z.string().min(1, "Nome da empresa é obrigatório"),
-}).omit({
-  id: true,
+  logo: z.string().optional(),
+  dominio: z.string().optional(),
+  ativo: z.boolean().optional().default(true),
 });
 
 export const selectEmpresaSchema = createSelectSchema(empresas);
 
 // Cliente schemas
-export const insertClienteSchema = createInsertSchema(clientes, {
+export const insertClienteSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
+  telefone: z.string().optional(),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
-}).omit({
-  id: true,
+  ativo: z.boolean().optional().default(true),
 });
 
 export const selectClienteSchema = createSelectSchema(clientes);
 
 // Camera schemas
-export const insertCameraSchema = createInsertSchema(cameras, {
+export const insertCameraSchema = z.object({
   nome: z.string().min(1, "Nome da câmera é obrigatório"),
-  protocolo: z.enum(["RTSP", "ONVIF", "P2P", "HTTP", "RTMP", "HLS"]),
+  protocolo: z.enum(["RTSP", "ONVIF", "P2P", "HTTP", "RTMP", "HLS"]).default("RTSP"),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
-  // Campos opcionais dependendo do protocolo
   urlConexao: z.string().optional(),
   usuario: z.string().optional(),
   senhaCam: z.string().optional(),
@@ -195,18 +196,19 @@ export const insertCameraSchema = createInsertSchema(cameras, {
   p2pId: z.string().optional(),
   p2pPassword: z.string().optional(),
   streamPath: z.string().optional(),
-}).omit({
-  id: true,
+  localizacao: z.string().optional(),
+  ativa: z.boolean().optional().default(true),
+  status: z.string().optional().default("offline"),
+  diasGravacao: z.number().int().optional().default(7),
+  resolucaoPreferida: z.string().optional().default("720p"),
 });
 
 export const selectCameraSchema = createSelectSchema(cameras);
 
 // Camera access schemas
-export const insertCameraAcessoSchema = createInsertSchema(cameraAcessos, {
+export const insertCameraAcessoSchema = z.object({
   cameraId: z.number().int().positive(),
   clienteId: z.number().int().positive(),
-}).omit({
-  id: true,
 });
 
 export const selectCameraAcessoSchema = createSelectSchema(cameraAcessos);
@@ -235,15 +237,13 @@ export type CameraAcesso = typeof cameraAcessos.$inferSelect;
 export type BatchCameraAcesso = z.infer<typeof batchCameraAcessoSchema>;
 
 // Notification schemas
-export const insertNotificationSchema = createInsertSchema(notifications, {
+export const insertNotificationSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   message: z.string().min(1, "Mensagem é obrigatória"),
   type: z.enum(["success", "warning", "error", "info"]),
+  read: z.boolean().optional().default(false),
   userId: z.number().int().optional(),
   empresaId: z.number().int().optional(),
-}).omit({
-  id: true,
-  createdAt: true, // createdAt is managed by defaultNow()
 });
 
 export const selectNotificationSchema = createSelectSchema(notifications);

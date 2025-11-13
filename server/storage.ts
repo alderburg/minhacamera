@@ -5,6 +5,7 @@ import {
   clientes,
   cameras,
   cameraAcessos,
+  notifications,
   type User,
   type InsertUser,
   type Empresa,
@@ -15,6 +16,8 @@ import {
   type InsertCamera,
   type CameraAcesso,
   type InsertCameraAcesso,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, inArray } from "drizzle-orm";
@@ -55,6 +58,11 @@ export interface IStorage {
     camerasOnline: number;
     camerasOffline: number;
   }>;
+  
+  // Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getNotifications(userId?: number, empresaId?: number): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -206,9 +214,9 @@ export class DatabaseStorage implements IStorage {
 
       totalEmpresas = 1;
       totalClientes = clientesList.length;
-      totalCameras = camerasList.filter((c) => c.status).length; // Only count enabled cameras
-      camerasOnline = camerasList.filter((c) => c.status && c.online).length;
-      camerasOffline = camerasList.filter((c) => c.status && !c.online).length;
+      totalCameras = camerasList.filter((c) => c.ativa).length; // Only count enabled cameras
+      camerasOnline = camerasList.filter((c) => c.ativa && c.status === 'online').length;
+      camerasOffline = camerasList.filter((c) => c.ativa && c.status === 'offline').length;
     } else {
       // Global stats for super admin
       const empresasList = await this.getAllEmpresas();
@@ -217,9 +225,9 @@ export class DatabaseStorage implements IStorage {
 
       totalEmpresas = empresasList.length;
       totalClientes = clientesList.length;
-      totalCameras = camerasList.filter((c) => c.status).length; // Only count enabled cameras
-      camerasOnline = camerasList.filter((c) => c.status && c.online).length;
-      camerasOffline = camerasList.filter((c) => c.status && !c.online).length;
+      totalCameras = camerasList.filter((c) => c.ativa).length; // Only count enabled cameras
+      camerasOnline = camerasList.filter((c) => c.ativa && c.status === 'online').length;
+      camerasOffline = camerasList.filter((c) => c.ativa && c.status === 'offline').length;
     }
 
     return {
@@ -229,6 +237,30 @@ export class DatabaseStorage implements IStorage {
       camerasOnline,
       camerasOffline,
     };
+  }
+  
+  // Notifications
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db.insert(notifications).values(insertNotification).returning();
+    return notification;
+  }
+  
+  async getNotifications(userId?: number, empresaId?: number): Promise<Notification[]> {
+    if (userId) {
+      return await db.select().from(notifications)
+        .where(eq(notifications.userId, userId))
+        .orderBy(notifications.createdAt);
+    } else if (empresaId) {
+      return await db.select().from(notifications)
+        .where(eq(notifications.empresaId, empresaId))
+        .orderBy(notifications.createdAt);
+    }
+    
+    return await db.select().from(notifications).orderBy(notifications.createdAt);
+  }
+  
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db.update(notifications).set({ read: true }).where(eq(notifications.id, id));
   }
 }
 

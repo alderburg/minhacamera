@@ -3,18 +3,7 @@ import { users, empresas, clientes, cameras, cameraAcessos, notifications } from
 import { eq, and, or, desc } from "drizzle-orm";
 import { hash, compare } from "bcryptjs";
 import { checkCameraHealth } from "./camera-health";
-import type { InsertNotification } from "@shared/schema";
-
-export interface Notification {
-  id: number;
-  title: string;
-  message: string;
-  type: 'success' | 'warning' | 'error' | 'info';
-  read: boolean;
-  createdAt: Date;
-  userId?: number | null;
-  empresaId?: number | null;
-}
+import type { InsertNotification, Notification } from "@shared/schema";
 
 export async function createNotification(
   title: string,

@@ -11,13 +11,17 @@ interface WebSocketClient extends WebSocket {
 let wss: WebSocketServer | null = null;
 
 export function setupWebSocket(server: Server) {
+  console.log('📡 Creating WebSocketServer on path: /ws');
+  
   wss = new WebSocketServer({
     server,
-    path: '/ws'
+    path: '/ws',
+    clientTracking: true,
+    perMessageDeflate: false, // Disable compression for better performance
   });
 
-  wss.on('connection', (ws: WebSocketClient) => {
-    console.log('WebSocket client connected');
+  wss.on('connection', (ws: WebSocketClient, request) => {
+    console.log('📱 WebSocket client connected from:', request.url);
     ws.isAlive = true;
 
     ws.on('pong', () => {
@@ -53,9 +57,17 @@ export function setupWebSocket(server: Server) {
 
   wss.on('close', () => {
     clearInterval(interval);
+    console.log('🔴 WebSocket server closed');
   });
 
-  console.log('WebSocket server initialized');
+  wss.on('error', (error) => {
+    console.error('❌ WebSocket server error:', error);
+  });
+
+  console.log('✅ WebSocket server initialized on path /ws');
+  const address = server.address();
+  const port = address && typeof address === 'object' ? address.port : 'unknown';
+  console.log(`   Clients will connect to: ws://localhost:${port}/ws`);
   return wss;
 }
 
