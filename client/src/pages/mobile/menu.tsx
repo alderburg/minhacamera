@@ -103,8 +103,8 @@ export default function MobileMenu() {
         }
       />
 
-      <div className="pt-20 px-4 md:pt-0 md:px-0">
-        <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 mb-6 border border-pink-100">
+      <div className="pt-20 md:pt-0 md:px-0">
+        <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 mb-6 border border-pink-100 mx-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16 border-2 border-pink-300">
               <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-500 text-white text-xl font-bold">
@@ -123,7 +123,7 @@ export default function MobileMenu() {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 px-4">
           {menuItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <button className="w-full bg-white rounded-xl p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors border border-gray-100">

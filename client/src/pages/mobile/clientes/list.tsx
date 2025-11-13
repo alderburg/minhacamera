@@ -50,8 +50,8 @@ export default function MobileClientesList() {
         }
       />
 
-      <div className="pt-20 px-4 md:pt-0 md:px-0">
-        <div className="mb-4">
+      <div className="pt-20 md:pt-0 md:px-0">
+        <div className="mb-4 px-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
@@ -84,7 +84,7 @@ export default function MobileClientesList() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 px-4">
             {filteredClientes.map((cliente) => (
               <Link key={cliente.id} href={`/mobile/clientes/edit/${cliente.id}`}>
                 <div className="bg-white rounded-xl p-4 border border-gray-100 hover:bg-gray-50 transition-colors">
