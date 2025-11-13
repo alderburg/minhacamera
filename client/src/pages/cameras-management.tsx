@@ -49,6 +49,7 @@ export default function CamerasManagement() {
   const [fullscreenCamera, setFullscreenCamera] = useState<Camera | null>(null);
   const [selectedClientes, setSelectedClientes] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [cameraSearchTerm, setCameraSearchTerm] = useState("");
   const [empresaSearchTerm, setEmpresaSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -280,12 +281,22 @@ export default function CamerasManagement() {
     setIsDialogOpen(true);
   };
 
-  // Paginação
-  const totalItems = cameras?.length || 0;
+  // Filtro e Paginação
+  const filteredCameras = cameras?.filter((camera) => {
+    if (!cameraSearchTerm) return true;
+    const search = cameraSearchTerm.toLowerCase();
+    return (
+      camera.nome.toLowerCase().includes(search) ||
+      camera.localizacao?.toLowerCase().includes(search) ||
+      camera.urlRtsp.toLowerCase().includes(search)
+    );
+  }) || [];
+
+  const totalItems = filteredCameras.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentCameras = cameras?.slice(startIndex, endIndex) || [];
+  const currentCameras = filteredCameras.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -335,6 +346,19 @@ export default function CamerasManagement() {
           <Plus className="h-4 w-4 mr-2" />
           Nova Câmera
         </Button>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Pesquisar câmeras por nome, localização ou URL..."
+          value={cameraSearchTerm}
+          onChange={(e) => {
+            setCameraSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="pl-9"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -484,10 +508,6 @@ export default function CamerasManagement() {
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
-
-          <div className="text-sm text-muted-foreground">
-            {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
           </div>
         </div>
       )}

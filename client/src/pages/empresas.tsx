@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Building2, Loader2, Pencil, Trash2, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Building2, Loader2, Pencil, Trash2, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Empresa, InsertEmpresa } from "@shared/schema";
 
@@ -45,6 +45,7 @@ export default function Empresas() {
   const [subdomain, setSubdomain] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [searchTerm, setSearchTerm] = useState("");
   const [subdomainStatus, setSubdomainStatus] = useState<{
     checking: boolean;
     available: boolean | null;
@@ -219,12 +220,21 @@ export default function Empresas() {
     setIsDialogOpen(true);
   };
 
-  // Paginação
-  const totalItems = empresas?.length || 0;
+  // Filtro e Paginação
+  const filteredEmpresas = empresas?.filter((empresa) => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      empresa.nome.toLowerCase().includes(search) ||
+      empresa.dominio?.toLowerCase().includes(search)
+    );
+  }) || [];
+
+  const totalItems = filteredEmpresas.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentEmpresas = empresas?.slice(startIndex, endIndex) || [];
+  const currentEmpresas = filteredEmpresas.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -247,6 +257,19 @@ export default function Empresas() {
           <Plus className="h-4 w-4 mr-2" />
           Nova Empresa
         </Button>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Pesquisar empresas por nome ou domínio..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="pl-9"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -358,10 +381,6 @@ export default function Empresas() {
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
-
-          <div className="text-sm text-muted-foreground">
-            {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
           </div>
         </div>
       )}

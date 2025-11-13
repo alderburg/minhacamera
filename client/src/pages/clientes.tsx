@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Loader2, Mail, Phone, Pencil, Trash2, Building2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Users, Loader2, Mail, Phone, Pencil, Trash2, Building2, X, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Cliente, InsertCliente, Empresa } from "@shared/schema";
@@ -45,6 +45,7 @@ export default function Clientes() {
   const [deletingCliente, setDeletingCliente] = useState<Cliente | null>(null);
   const [empresaSearchTerm, setEmpresaSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [formData, setFormData] = useState<InsertCliente>({
@@ -218,12 +219,22 @@ export default function Clientes() {
     );
   }
 
-  // Paginação
-  const totalItems = clientes?.length || 0;
+  // Filtro e Paginação
+  const filteredClientes = clientes?.filter((cliente) => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      cliente.nome.toLowerCase().includes(search) ||
+      cliente.email.toLowerCase().includes(search) ||
+      cliente.telefone?.toLowerCase().includes(search)
+    );
+  }) || [];
+
+  const totalItems = filteredClientes.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentClientes = clientes?.slice(startIndex, endIndex) || [];
+  const currentClientes = filteredClientes.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -246,6 +257,19 @@ export default function Clientes() {
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
         </Button>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Pesquisar clientes por nome, e-mail ou telefone..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="pl-9"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -364,10 +388,6 @@ export default function Clientes() {
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
-
-          <div className="text-sm text-muted-foreground">
-            {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
           </div>
         </div>
       )}
