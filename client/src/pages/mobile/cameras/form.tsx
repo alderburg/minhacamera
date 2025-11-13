@@ -86,7 +86,7 @@ export default function MobileCameraForm() {
   }, []);
 
   useEffect(() => {
-    if (camera && !isLoadingCamera) {
+    if (camera) {
       setFormData({
         nome: camera.nome,
         protocolo: camera.protocolo || "RTSP",
@@ -116,7 +116,7 @@ export default function MobileCameraForm() {
         }
       }
     }
-  }, [camera, empresas, isSuperAdmin, isLoadingCamera]);
+  }, [camera, empresas, isSuperAdmin]);
 
   if (isEditing && isLoadingCamera) {
     return (

@@ -72,7 +72,7 @@ export default function MobileClienteForm() {
   }, []);
 
   useEffect(() => {
-    if (cliente && !isLoadingCliente) {
+    if (cliente) {
       setFormData({
         nome: cliente.nome,
         email: cliente.email || "",
@@ -90,7 +90,7 @@ export default function MobileClienteForm() {
         }
       }
     }
-  }, [cliente, empresas, isSuperAdmin, isLoadingCliente]);
+  }, [cliente, empresas, isSuperAdmin]);
 
   if (isEditing && isLoadingCliente) {
     return (
