@@ -285,7 +285,12 @@ export default function CamerasManagement() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {cameras?.map((camera) => (
-          <Card key={camera.id} className="hover-elevate" data-testid={`camera-card-${camera.id}`}>
+          <Card 
+            key={camera.id} 
+            className="hover-elevate cursor-pointer" 
+            data-testid={`camera-card-${camera.id}`}
+            onClick={() => setFullscreenCamera(camera)}
+          >
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -311,14 +316,17 @@ export default function CamerasManagement() {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center gap-2 flex-wrap">
+              <div className="mt-4 flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                 <Badge variant={camera.ativa ? "default" : "secondary"} className="text-xs">
                   {camera.ativa ? "Ativa" : "Inativa"}
                 </Badge>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => openAccessDialog(camera)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openAccessDialog(camera);
+                  }}
                   data-testid={`button-manage-access-${camera.id}`}
                 >
                   <Users className="h-3 w-3 mr-1" />
@@ -329,7 +337,10 @@ export default function CamerasManagement() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8"
-                    onClick={() => setFullscreenCamera(camera)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFullscreenCamera(camera);
+                    }}
                     data-testid={`button-view-camera-${camera.id}`}
                   >
                     <Video className="h-4 w-4" />
@@ -338,7 +349,10 @@ export default function CamerasManagement() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8"
-                    onClick={() => handleEdit(camera)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(camera);
+                    }}
                     data-testid={`button-edit-camera-${camera.id}`}
                   >
                     <Pencil className="h-4 w-4" />
@@ -347,7 +361,10 @@ export default function CamerasManagement() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => handleDelete(camera)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(camera);
+                    }}
                     data-testid={`button-delete-camera-${camera.id}`}
                   >
                     <Trash2 className="h-4 w-4" />
