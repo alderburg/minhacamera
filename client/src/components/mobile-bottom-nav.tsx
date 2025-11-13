@@ -8,35 +8,28 @@ export function MobileBottomNav() {
 
   if (!user) return null;
 
-  const isSuperAdmin = user.tipo === "super_admin";
-  const isAdmin = user.tipo === "admin" || user.tipo === "super_admin";
-
   const navItems = [
     {
       title: "Início",
       url: "/mobile/home",
       icon: Home,
-      show: true,
     },
     {
       title: "Empresas",
       url: "/mobile/empresas",
       icon: Building2,
-      show: isSuperAdmin,
     },
     {
       title: "Clientes",
       url: "/mobile/clientes",
       icon: Users,
-      show: isAdmin,
     },
     {
       title: "Câmeras",
       url: "/mobile/cameras",
       icon: Video,
-      show: true,
     },
-  ].filter(item => item.show);
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 z-50 md:hidden">
