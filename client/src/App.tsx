@@ -65,8 +65,12 @@ function PublicRoute({ component: Component, ...rest }: any) {
   }
 
   if (user) {
-    // Always redirect to mobile home after login
-    return <Redirect to="/mobile/home" />;
+    // Redirect based on user type
+    if (user.tipo === "user") {
+      return <Redirect to="/mobile/home" />;
+    } else {
+      return <Redirect to="/dashboard" />;
+    }
   }
 
   return <Component {...rest} />;
@@ -206,7 +210,12 @@ function Router() {
             return <Redirect to="/login" />;
           }
           
-          return <Redirect to="/mobile/home" />;
+          // Redirect based on user type
+          if (user.tipo === "user") {
+            return <Redirect to="/mobile/home" />;
+          } else {
+            return <Redirect to="/dashboard" />;
+          }
         }}
       </Route>
 
