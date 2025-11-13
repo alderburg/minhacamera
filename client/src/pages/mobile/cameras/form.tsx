@@ -34,13 +34,13 @@ export default function MobileCameraForm() {
   });
 
   const [formData, setFormData] = useState<InsertCamera>({
-    nome: camera?.nome || "",
-    urlRtsp: camera?.urlRtsp || "",
-    empresaId: camera?.empresaId || user?.empresaId || 0,
-    ativa: camera?.ativa ?? true,
-    localizacao: camera?.localizacao || "",
-    diasGravacao: camera?.diasGravacao || 7,
-    resolucaoPreferida: camera?.resolucaoPreferida || "720p",
+    nome: "",
+    urlRtsp: "",
+    empresaId: user?.empresaId || 0,
+    ativa: true,
+    localizacao: "",
+    diasGravacao: 7,
+    resolucaoPreferida: "720p",
   });
 
   useEffect(() => {

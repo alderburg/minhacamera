@@ -25,10 +25,10 @@ export default function MobileEmpresaForm() {
   });
 
   const [formData, setFormData] = useState<InsertEmpresa>({
-    nome: empresa?.nome || "",
-    logo: empresa?.logo || "",
-    dominio: empresa?.dominio || "",
-    ativo: empresa?.ativo ?? true,
+    nome: "",
+    logo: "",
+    dominio: "",
+    ativo: true,
   });
 
   useEffect(() => {

@@ -34,11 +34,11 @@ export default function MobileClienteForm() {
   });
 
   const [formData, setFormData] = useState<InsertCliente>({
-    nome: cliente?.nome || "",
-    email: cliente?.email || "",
-    telefone: cliente?.telefone || "",
-    empresaId: cliente?.empresaId || user?.empresaId || 0,
-    ativo: cliente?.ativo ?? true,
+    nome: "",
+    email: "",
+    telefone: "",
+    empresaId: user?.empresaId || 0,
+    ativo: true,
   });
 
   useEffect(() => {
