@@ -1,6 +1,7 @@
 
 import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { notifications } from "@shared/schema";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface Notification {
   id: number;
@@ -9,53 +10,121 @@ export interface Notification {
   type: 'success' | 'warning' | 'error' | 'info';
   read: boolean;
   createdAt: Date;
+  userId?: number | null;
+  empresaId?: number | null;
 }
 
-// In-memory storage for notifications (you can move to database later)
-const notifications: Notification[] = [];
-let notificationIdCounter = 1;
-
-export function createNotification(
+export async function createNotification(
   title: string,
   message: string,
-  type: 'success' | 'warning' | 'error' | 'info' = 'info'
-): Notification {
-  const notification: Notification = {
-    id: notificationIdCounter++,
+  type: 'success' | 'warning' | 'error' | 'info' = 'info',
+  userId?: number,
+  empresaId?: number
+): Promise<Notification> {
+  const [notification] = await db.insert(notifications).values({
     title,
     message,
     type,
-    read: false,
-    createdAt: new Date(),
-  };
-
-  notifications.unshift(notification);
-
-  // Keep only last 100 notifications
-  if (notifications.length > 100) {
-    notifications.pop();
-  }
+    userId: userId || null,
+    empresaId: empresaId || null,
+  }).returning();
 
   return notification;
 }
 
-export function getNotifications(limit = 50): Notification[] {
-  return notifications.slice(0, limit);
-}
-
-export function markNotificationAsRead(id: number): boolean {
-  const notification = notifications.find(n => n.id === id);
-  if (notification) {
-    notification.read = true;
-    return true;
+export async function getNotifications(
+  limit = 50,
+  userId?: number,
+  empresaId?: number
+): Promise<Notification[]> {
+  let query = db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(limit);
+  
+  if (userId) {
+    const results = await db.select()
+      .from(notifications)
+      .where(
+        and(
+          eq(notifications.userId, userId)
+        )
+      )
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+    return results;
   }
-  return false;
+  
+  if (empresaId) {
+    const results = await db.select()
+      .from(notifications)
+      .where(
+        and(
+          eq(notifications.empresaId, empresaId)
+        )
+      )
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+    return results;
+  }
+
+  return await query;
 }
 
-export function markAllNotificationsAsRead(): void {
-  notifications.forEach(n => n.read = true);
+export async function markNotificationAsRead(id: number): Promise<boolean> {
+  const result = await db
+    .update(notifications)
+    .set({ read: true })
+    .where(eq(notifications.id, id))
+    .returning();
+  
+  return result.length > 0;
 }
 
-export function getUnreadCount(): number {
-  return notifications.filter(n => !n.read).length;
+export async function markAllNotificationsAsRead(userId?: number, empresaId?: number): Promise<void> {
+  if (userId) {
+    await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.userId, userId));
+    return;
+  }
+  
+  if (empresaId) {
+    await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.empresaId, empresaId));
+    return;
+  }
+
+  await db.update(notifications).set({ read: true });
+}
+
+export async function getUnreadCount(userId?: number, empresaId?: number): Promise<number> {
+  if (userId) {
+    const results = await db.select()
+      .from(notifications)
+      .where(
+        and(
+          eq(notifications.userId, userId),
+          eq(notifications.read, false)
+        )
+      );
+    return results.length;
+  }
+  
+  if (empresaId) {
+    const results = await db.select()
+      .from(notifications)
+      .where(
+        and(
+          eq(notifications.empresaId, empresaId),
+          eq(notifications.read, false)
+        )
+      );
+    return results.length;
+  }
+
+  const results = await db.select()
+    .from(notifications)
+    .where(eq(notifications.read, false));
+  return results.length;
 }

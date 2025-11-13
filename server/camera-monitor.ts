@@ -19,7 +19,7 @@ export function onCameraStatusChange(listener: (change: CameraStatusChange) => v
 }
 
 export async function monitorCameras() {
-  const allCameras = await db.select().from(cameras);
+  const allCameras = await db.select().from(cameras).where(eq(cameras.status, true));
 
   for (const camera of allCameras) {
     const health = await checkCameraHealth(camera.urlConexao, camera.ip, 5000);
@@ -29,8 +29,7 @@ export async function monitorCameras() {
     // Update camera status in database if changed
     if (wasOnline !== isOnline) {
       try {
-        await db
-          .update(cameras)
+        await db.update(cameras)
           .set({ online: isOnline })
           .where(eq(cameras.id, camera.id));
 
@@ -56,8 +55,7 @@ export async function monitorCameras() {
     } else if (camera.online !== isOnline) {
       // Update even if same status but database is outdated
       try {
-        await db
-          .update(cameras)
+        await db.update(cameras)
           .set({ online: isOnline })
           .where(eq(cameras.id, camera.id));
       } catch (error) {

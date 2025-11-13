@@ -206,9 +206,9 @@ export class DatabaseStorage implements IStorage {
 
       totalEmpresas = 1;
       totalClientes = clientesList.length;
-      totalCameras = camerasList.length;
-      camerasOnline = camerasList.filter((c) => c.ativa).length;
-      camerasOffline = camerasList.filter((c) => !c.ativa).length;
+      totalCameras = camerasList.filter((c) => c.status).length; // Only count enabled cameras
+      camerasOnline = camerasList.filter((c) => c.status && c.online).length;
+      camerasOffline = camerasList.filter((c) => c.status && !c.online).length;
     } else {
       // Global stats for super admin
       const empresasList = await this.getAllEmpresas();
@@ -217,9 +217,9 @@ export class DatabaseStorage implements IStorage {
 
       totalEmpresas = empresasList.length;
       totalClientes = clientesList.length;
-      totalCameras = camerasList.length;
-      camerasOnline = camerasList.filter((c) => c.ativa).length;
-      camerasOffline = camerasList.filter((c) => !c.ativa).length;
+      totalCameras = camerasList.filter((c) => c.status).length; // Only count enabled cameras
+      camerasOnline = camerasList.filter((c) => c.status && c.online).length;
+      camerasOffline = camerasList.filter((c) => c.status && !c.online).length;
     }
 
     return {

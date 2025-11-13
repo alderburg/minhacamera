@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, integer, boolean, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, boolean, unique, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -39,32 +39,33 @@ export const cameras = pgTable("cameras", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   nome: text("nome").notNull(),
   protocolo: text("protocolo").notNull().default("RTSP"), // 'RTSP' | 'ONVIF' | 'P2P' | 'HTTP' | 'RTMP' | 'HLS'
-  
+
   // URL/Conexão - campos genéricos que servem para todos os protocolos
   urlConexao: text("url_conexao"), // URL principal (RTSP, HTTP, HLS, etc)
   usuario: text("usuario"), // Usuário para autenticação
   senhaCam: text("senha_cam"), // Senha da câmera
-  
+
   // Campos específicos para cada protocolo
   ip: text("ip"), // IP da câmera (ONVIF, P2P)
   porta: integer("porta"), // Porta de conexão
   canalRtsp: text("canal_rtsp"), // Canal RTSP (ex: /stream1, /Streaming/Channels/101)
-  
+
   // ONVIF específico
   onvifPort: integer("onvif_port"), // Porta ONVIF (geralmente 80 ou 8000)
   profileToken: text("profile_token"), // Token do perfil ONVIF
-  
+
   // P2P específico
   p2pId: text("p2p_id"), // ID único do dispositivo P2P
   p2pPassword: text("p2p_password"), // Senha P2P
-  
+
   // HTTP/RTMP/HLS específico
   streamPath: text("stream_path"), // Caminho do stream (para HTTP/HLS)
-  
+
   empresaId: integer("empresa_id").notNull().references(() => empresas.id),
   localizacao: text("localizacao"),
   ativa: boolean("ativa").notNull().default(true),
-  
+  status: text("status").notNull().default("offline"), // 'online' | 'offline' | 'error' | 'disabled'
+
   // Configurações
   diasGravacao: integer("dias_gravacao").default(7),
   resolucaoPreferida: text("resolucao_preferida").default("720p"),
@@ -79,6 +80,18 @@ export const cameraAcessos = pgTable("camera_acessos", {
   // Composite unique constraint to prevent duplicate camera/client mappings
   uniqueCameraCliente: unique().on(table.cameraId, table.clienteId),
 }));
+
+// Notifications table - system and camera notifications
+export const notifications = pgTable("notifications", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // 'success' | 'warning' | 'error' | 'info'
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  empresaId: integer("empresa_id").references(() => empresas.id, { onDelete: "cascade" }),
+});
 
 // Define relations
 export const usersRelations = relations(users, ({ one }) => ({
@@ -174,6 +187,7 @@ export const insertCameraSchema = createInsertSchema(cameras, {
   protocolo: z.enum(["RTSP", "ONVIF", "P2P", "HTTP", "RTMP", "HLS"]),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
   ativa: z.boolean().optional(),
+  status: z.enum(["online", "offline", "error", "disabled"]).optional().default("offline"),
   // Campos opcionais dependendo do protocolo
   urlConexao: z.string().optional(),
   usuario: z.string().optional(),
@@ -224,3 +238,22 @@ export type Camera = typeof cameras.$inferSelect;
 export type InsertCameraAcesso = z.infer<typeof insertCameraAcessoSchema>;
 export type CameraAcesso = typeof cameraAcessos.$inferSelect;
 export type BatchCameraAcesso = z.infer<typeof batchCameraAcessoSchema>;
+
+// Notification schemas
+export const insertNotificationSchema = createInsertSchema(notifications, {
+  title: z.string().min(1, "Título é obrigatório"),
+  message: z.string().min(1, "Mensagem é obrigatória"),
+  type: z.enum(["success", "warning", "error", "info"]),
+  read: z.boolean().optional(),
+  userId: z.number().int().optional(),
+  empresaId: z.number().int().optional(),
+}).omit({
+  id: true,
+  createdAt: true, // createdAt is managed by defaultNow()
+});
+
+export const selectNotificationSchema = createSelectSchema(notifications);
+
+// TypeScript types for notifications
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
