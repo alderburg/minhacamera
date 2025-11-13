@@ -65,12 +65,8 @@ function PublicRoute({ component: Component, ...rest }: any) {
   }
 
   if (user) {
-    // Redirect based on user type
-    if (user.tipo === "user") {
-      return <Redirect to="/mobile/home" />;
-    } else {
-      return <Redirect to="/dashboard" />;
-    }
+    // Always redirect to dashboard
+    return <Redirect to="/dashboard" />;
   }
 
   return <Component {...rest} />;
@@ -210,22 +206,13 @@ function Router() {
             return <Redirect to="/login" />;
           }
           
-          // Redirect based on user type
-          if (user.tipo === "user") {
-            return <Redirect to="/mobile/home" />;
-          } else {
-            return <Redirect to="/dashboard" />;
-          }
+          // Always redirect to dashboard
+          return <Redirect to="/dashboard" />;
         }}
       </Route>
 
       <Route path="/login">
         <PublicRoute component={Login} />
-      </Route>
-
-      {/* Mobile Routes */}
-      <Route path="/mobile/home">
-        <ProtectedRoute component={MobileHome} />
       </Route>
 
       <Route path="/mobile/menu">
@@ -276,9 +263,12 @@ function Router() {
         <ProtectedRoute component={MobileConfiguracoes} />
       </Route>
 
-      {/* Desktop Routes */}
+      {/* Dashboard - renders mobile or desktop version based on screen size */}
       <Route path="/dashboard">
-        <ProtectedRoute component={Dashboard} />
+        {() => {
+          const isMobile = window.innerWidth < 768;
+          return <ProtectedRoute component={isMobile ? MobileHome : Dashboard} />;
+        }}
       </Route>
 
       <Route path="/empresas">

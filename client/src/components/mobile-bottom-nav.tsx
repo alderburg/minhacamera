@@ -11,23 +11,27 @@ export function MobileBottomNav() {
   const navItems = [
     {
       title: "Início",
-      url: "/mobile/home",
+      url: "/dashboard",
       icon: Home,
+      show: true,
     },
     {
       title: "Empresas",
       url: "/mobile/empresas",
       icon: Building2,
+      show: true,
     },
     {
       title: "Clientes",
       url: "/mobile/clientes",
       icon: Users,
+      show: true,
     },
     {
       title: "Câmeras",
       url: "/mobile/cameras",
       icon: Video,
+      show: true,
     },
   ];
 
