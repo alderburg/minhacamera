@@ -85,10 +85,10 @@ export default function MobileMenu() {
   ].filter(item => item.show);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar 
         showBack 
-        backUrl="/mobile/home"
+        backUrl="/dashboard"
         title="Menu"
         subtitle="Navegação do sistema"
         rightAction={
@@ -98,7 +98,7 @@ export default function MobileMenu() {
         }
       />
 
-      <div className="pt-20 px-4">
+      <div className="pt-20 px-4 md:pt-0 md:px-0">
         <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 mb-6 border border-pink-100">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16 border-2 border-pink-300">

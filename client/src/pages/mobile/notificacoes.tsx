@@ -15,15 +15,15 @@ export default function MobileNotificacoes() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar 
         showBack 
-        backUrl="/mobile/home"
+        backUrl="/dashboard"
         title="Notificações"
         subtitle="Alertas e avisos do sistema"
       />
 
-      <div className="pt-20 px-4">
+      <div className="pt-20 px-4 md:pt-0 md:px-0">
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Bell className="h-16 w-16 text-gray-300 mb-4" />

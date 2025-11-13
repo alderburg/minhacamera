@@ -67,10 +67,10 @@ export default function MobileHome() {
   ].filter(card => card.show);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar showProfile />
 
-      <div className="pt-24 px-4">
+      <div className="pt-20 px-4 md:pt-0 md:px-0">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
             Bem-vindo! 👋

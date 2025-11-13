@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 
 export default function MobileConfiguracoes() {
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar 
         showBack 
         backUrl="/mobile/menu"
@@ -18,7 +18,7 @@ export default function MobileConfiguracoes() {
         }
       />
 
-      <div className="pt-20 px-4">
+      <div className="pt-20 px-4 md:pt-0 md:px-0">
         <div className="space-y-6">
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">

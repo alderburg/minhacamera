@@ -21,10 +21,10 @@ export default function MobileEmpresasList() {
   ) || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar 
         showBack 
-        backUrl="/mobile/home"
+        backUrl="/dashboard"
         title="Empresas"
         subtitle={`${filteredEmpresas.length} empresas cadastradas`}
         rightAction={
@@ -36,7 +36,7 @@ export default function MobileEmpresasList() {
         }
       />
 
-      <div className="pt-20 px-4">
+      <div className="pt-20 px-4 md:pt-0 md:px-0">
         <div className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
