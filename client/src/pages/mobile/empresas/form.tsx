@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Empresa, InsertEmpresa } from "@shared/schema";
 
@@ -31,6 +31,17 @@ export default function MobileEmpresaForm() {
     logo: "",
     dominio: "",
     ativo: true,
+  });
+
+  const [subdomain, setSubdomain] = useState("");
+  const [subdomainStatus, setSubdomainStatus] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    message: string;
+  }>({
+    checking: false,
+    available: null,
+    message: "",
   });
 
   const { data: empresa, isLoading: isLoadingEmpresa } = useQuery<Empresa>({
@@ -62,6 +73,48 @@ export default function MobileEmpresaForm() {
     },
   });
 
+  const checkSubdomain = async (sub: string) => {
+    if (sub.length < 3) {
+      setSubdomainStatus({
+        checking: false,
+        available: null,
+        message: "Mínimo de 3 caracteres",
+      });
+      return;
+    }
+
+    setSubdomainStatus({ checking: true, available: null, message: "" });
+
+    try {
+      const response = await fetch(`/api/empresas/check-subdomain?subdomain=${sub}`);
+      const data = await response.json();
+
+      setSubdomainStatus({
+        checking: false,
+        available: data.available,
+        message: data.available ? "Subdomínio disponível" : "Subdomínio já está em uso",
+      });
+    } catch (error) {
+      setSubdomainStatus({
+        checking: false,
+        available: false,
+        message: "Erro ao verificar subdomínio",
+      });
+    }
+  };
+
+  const handleSubdomainChange = (value: string) => {
+    const sanitized = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+    setSubdomain(sanitized);
+    const fullDomain = sanitized ? `${sanitized}.minhacamera.com` : "";
+    setFormData({ ...formData, dominio: fullDomain });
+
+    if (sanitized.length >= 3) {
+      const timeoutId = setTimeout(() => checkSubdomain(sanitized), 500);
+      return () => clearTimeout(timeoutId);
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -81,6 +134,12 @@ export default function MobileEmpresaForm() {
         dominio: empresa.dominio || "",
         ativo: empresa.ativo,
       });
+
+      // Extrair subdomínio se existir
+      if (empresa.dominio) {
+        const sub = empresa.dominio.replace(".minhacamera.com", "");
+        setSubdomain(sub);
+      }
     } else {
       console.log('Empresa não carregada ainda');
     }
@@ -135,20 +194,54 @@ export default function MobileEmpresaForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dominio" className="text-sm font-medium text-gray-700">
-              Domínio
+            <Label htmlFor="subdomain" className="text-sm font-medium text-gray-700">
+              Subdomínio
             </Label>
-            <Input
-              id="dominio"
-              value={formData.dominio}
-              onChange={(e) => setFormData({ ...formData, dominio: e.target.value })}
-              placeholder="exemplo.com.br"
-              className="h-12 bg-white"
-              data-testid="input-dominio"
-            />
-            <p className="text-xs text-muted-foreground">
-              URL personalizada para acesso da empresa
-            </p>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    id="subdomain"
+                    placeholder="empresa"
+                    value={subdomain}
+                    onChange={(e) => handleSubdomainChange(e.target.value)}
+                    disabled={!!empresaId}
+                    data-testid="input-subdomain"
+                    className="h-12 bg-white pr-10"
+                  />
+                  {!empresaId && subdomain.length >= 3 && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {subdomainStatus.checking ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      ) : subdomainStatus.available === true ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      ) : subdomainStatus.available === false ? (
+                        <XCircle className="h-4 w-4 text-destructive" />
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+                <span className="text-muted-foreground text-sm whitespace-nowrap">.minhacamera.com</span>
+              </div>
+              {!empresaId && subdomainStatus.message && (
+                <p
+                  className={`text-xs ${
+                    subdomainStatus.available
+                      ? "text-green-600"
+                      : subdomainStatus.available === false
+                      ? "text-destructive"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {subdomainStatus.message}
+                </p>
+              )}
+              {empresaId && (
+                <p className="text-xs text-muted-foreground">
+                  Subdomínio não pode ser alterado após criação
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
