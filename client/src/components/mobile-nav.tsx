@@ -1,10 +1,42 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Video, User, Building2, Users } from "lucide-react";
+import { LayoutDashboard, Video, User, Building2, Users, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export function MobileNav() {
   const [location] = useLocation();
   const { user } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [hasNotification, setHasNotification] = useState(false);
+
+  useEffect(() => {
+    // Simulate fetching notifications
+    const fetchedNotifications = [
+      {
+        id: 1,
+        message: "Nova notificação simulada!",
+        timestamp: new Date(),
+      },
+    ];
+    setNotifications(fetchedNotifications);
+    if (fetchedNotifications.length > 0) {
+      setHasNotification(true);
+    }
+  }, []);
+
+  const handleNotificationClick = () => {
+    setIsNotificationModalOpen(true);
+    setHasNotification(false); // Clear notification indicator after opening
+  };
 
   if (!user) return null;
 
@@ -79,6 +111,12 @@ export function MobileNav() {
       icon: Video,
       show: true,
     },
+    {
+      title: "Notificações",
+      url: "/notificacoes",
+      icon: Bell,
+      show: isAdmin,
+    },
   ].filter((item) => item.show);
 
   return (
@@ -102,6 +140,49 @@ export function MobileNav() {
             </Link>
           );
         })}
+        <Dialog open={isNotificationModalOpen} onOpenChange={setIsNotificationModalOpen}>
+          <DialogTrigger asChild>
+            <button
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors relative ${
+                location === "/notificacoes"
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={handleNotificationClick}
+              data-testid="mobile-nav-notifications"
+            >
+              <Bell className={`h-5 w-5 ${location === "/notificacoes" ? "fill-current" : ""} ${hasNotification ? "animate-pulse text-red-500" : ""}`} />
+              <span className="text-xs font-medium">Notificações</span>
+              {hasNotification && (
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+              )}
+            </button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Notificações</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              {notifications.length > 0 ? (
+                notifications.map((notif) => (
+                  <div key={notif.id} className="mb-4 p-3 border rounded-md">
+                    <p className="text-sm">{notif.message}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {notif.timestamp.toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground">Nenhuma notificação no momento.</p>
+              )}
+              <div className="mt-4 text-center">
+                <Link href="/notificacoes">
+                  <Button variant="outline" size="sm">Ver todas as notificações</Button>
+                </Link>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </nav>
   );

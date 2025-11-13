@@ -6,6 +6,7 @@ import {
   Video,
   Settings,
   LogOut,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +56,11 @@ export function AppSidebar() {
       url: "/cameras",
       icon: Video,
       show: true,
+    },
+    {
+      title: "Notificações",
+      url: "/notificacoes",
+      icon: Bell,
     },
   ];
 
