@@ -1,7 +1,9 @@
-
 import { db } from "./db";
-import { notifications } from "@shared/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { users, empresas, clientes, cameras, cameraAcessos, notifications } from "@shared/schema";
+import { eq, and, or, desc } from "drizzle-orm";
+import { hash, compare } from "bcryptjs";
+import { checkCameraHealth } from "./camera-health";
+import type { InsertNotification } from "@shared/schema";
 
 export interface Notification {
   id: number;
@@ -38,7 +40,7 @@ export async function getNotifications(
   empresaId?: number
 ): Promise<Notification[]> {
   let query = db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(limit);
-  
+
   if (userId) {
     const results = await db.select()
       .from(notifications)
@@ -51,7 +53,7 @@ export async function getNotifications(
       .limit(limit);
     return results;
   }
-  
+
   if (empresaId) {
     const results = await db.select()
       .from(notifications)
@@ -74,7 +76,7 @@ export async function markNotificationAsRead(id: number): Promise<boolean> {
     .set({ read: true })
     .where(eq(notifications.id, id))
     .returning();
-  
+
   return result.length > 0;
 }
 
@@ -86,7 +88,7 @@ export async function markAllNotificationsAsRead(userId?: number, empresaId?: nu
       .where(eq(notifications.userId, userId));
     return;
   }
-  
+
   if (empresaId) {
     await db
       .update(notifications)
@@ -110,7 +112,7 @@ export async function getUnreadCount(userId?: number, empresaId?: number): Promi
       );
     return results.length;
   }
-  
+
   if (empresaId) {
     const results = await db.select()
       .from(notifications)

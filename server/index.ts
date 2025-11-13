@@ -80,13 +80,13 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
-    
+
     // Setup WebSocket
     setupWebSocket(server);
-    
+
     // Start camera monitoring
     startCameraMonitoring(30000); // Check every 30 seconds
-    
+
     // Listen for camera status changes
     onCameraStatusChange((change) => {
       // Broadcast status change via WebSocket

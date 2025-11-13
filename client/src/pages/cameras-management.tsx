@@ -454,6 +454,7 @@ export default function CamerasManagement() {
               </div>
 
               <div className="mt-4 flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                <CameraStatus status={camera.status} size="sm" />
                 <Badge variant={camera.ativa ? "default" : "secondary"} className="text-xs">
                   {camera.ativa ? "Ativa" : "Inativa"}
                 </Badge>

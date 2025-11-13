@@ -19,18 +19,25 @@ export function onCameraStatusChange(listener: (change: CameraStatusChange) => v
 }
 
 export async function monitorCameras() {
-  const allCameras = await db.select().from(cameras).where(eq(cameras.status, true));
+  // Only monitor active cameras (status !== 'disabled')
+  const allCameras = await db.select().from(cameras).where(eq(cameras.ativa, true));
 
   for (const camera of allCameras) {
+    // Skip if camera is manually disabled
+    if (camera.status === 'disabled') {
+      continue;
+    }
+
     const health = await checkCameraHealth(camera.urlConexao, camera.ip, 5000);
-    const wasOnline = camera.online ?? false;
+    const wasOnline = camera.status === 'online';
     const isOnline = health.online;
+    const newStatus = isOnline ? 'online' : 'offline';
 
     // Update camera status in database if changed
-    if (wasOnline !== isOnline) {
+    if (camera.status !== newStatus) {
       try {
         await db.update(cameras)
-          .set({ online: isOnline })
+          .set({ status: newStatus })
           .where(eq(cameras.id, camera.id));
 
         // Notify listeners
@@ -49,15 +56,6 @@ export async function monitorCameras() {
             console.error('Error in status change listener:', error);
           }
         });
-      } catch (error) {
-        console.error(`Error updating camera ${camera.id} status:`, error);
-      }
-    } else if (camera.online !== isOnline) {
-      // Update even if same status but database is outdated
-      try {
-        await db.update(cameras)
-          .set({ online: isOnline })
-          .where(eq(cameras.id, camera.id));
       } catch (error) {
         console.error(`Error updating camera ${camera.id} status:`, error);
       }

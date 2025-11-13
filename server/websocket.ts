@@ -1,6 +1,7 @@
-
 import { WebSocketServer, WebSocket } from 'ws';
-import type { Server } from 'http';
+import type { Notification } from '@shared/schema';
+
+const clients = new Set<WebSocket>();
 
 interface WebSocketClient extends WebSocket {
   isAlive: boolean;
@@ -9,7 +10,7 @@ interface WebSocketClient extends WebSocket {
 let wss: WebSocketServer | null = null;
 
 export function setupWebSocket(server: Server) {
-  wss = new WebSocketServer({ 
+  wss = new WebSocketServer({
     server,
     path: '/ws'
   });
@@ -80,7 +81,7 @@ export function broadcastCameraStatusChange(data: {
       sentCount++;
     }
   });
-  
+
   console.log(`📹 Broadcast camera status change to ${sentCount} client(s):`, data.cameraNome, data.isOnline ? 'ONLINE' : 'OFFLINE');
 }
 
@@ -108,7 +109,7 @@ export function broadcastNotification(notification: {
       sentCount++;
     }
   });
-  
+
   console.log(`🔔 Broadcast notification to ${sentCount} client(s):`, notification.title);
 }
 
