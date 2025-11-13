@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2 } from "lucide-react";
+import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
@@ -321,18 +321,18 @@ export default function CamerasManagement() {
                   onClick={() => openAccessDialog(camera)}
                   data-testid={`button-manage-access-${camera.id}`}
                 >
-                  <Edit className="h-3 w-3 mr-1" />
+                  <Users className="h-3 w-3 mr-1" />
                   Acessos
                 </Button>
                 <div className="ml-auto flex gap-1">
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
+                    className="h-8 w-8"
                     onClick={() => setFullscreenCamera(camera)}
                     data-testid={`button-view-camera-${camera.id}`}
                   >
-                    <Video className="h-3 w-3 mr-1" />
-                    Ver
+                    <Video className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
