@@ -169,7 +169,7 @@ export default function CamerasManagement() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Normalize numeric fields to avoid empty string issues
     const normalizedData = {
       ...formData,
@@ -177,7 +177,7 @@ export default function CamerasManagement() {
       onvifPort: formData.onvifPort || undefined,
       diasGravacao: formData.diasGravacao || 7,
     };
-    
+
     createMutation.mutate(normalizedData);
   };
 
@@ -571,14 +571,15 @@ export default function CamerasManagement() {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>{editingCamera ? "Editar Câmera" : "Nova Câmera"}</DialogTitle>
             <DialogDescription>
               {editingCamera ? "Atualize os dados da câmera" : "Cadastre uma nova câmera IP no sistema"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+            <div className="space-y-4 overflow-y-auto pr-2">
             {isSuperAdmin && (
               <div className="space-y-2">
                 <Label htmlFor="empresa">Empresa *</Label>
@@ -806,7 +807,7 @@ export default function CamerasManagement() {
                     value={formData.urlConexao}
                     onChange={(e) => setFormData({ ...formData, urlConexao: e.target.value })}
                     placeholder={
-                      formData.protocolo === "HLS" 
+                      formData.protocolo === "HLS"
                         ? "https://exemplo.com/stream.m3u8"
                         : formData.protocolo === "RTMP"
                         ? "rtmp://servidor/live/stream"
@@ -911,8 +912,9 @@ export default function CamerasManagement() {
                 </p>
               </div>
             </div>
+            </div>
 
-            <DialogFooter>
+            <DialogFooter className="mt-4 pt-4 border-t sticky bottom-0 bg-background">
               <Button
                 type="button"
                 variant="outline"
