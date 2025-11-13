@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -464,6 +465,25 @@ export default function Empresas() {
                 onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
                 data-testid="input-empresa-logo"
               />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-4 rounded-md border bg-muted/50">
+                <div className="flex-1">
+                  <Label htmlFor="ativo" className="text-sm font-medium cursor-pointer">
+                    Status da Empresa
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formData.ativo ? "Empresa ativa no sistema" : "Empresa inativa no sistema"}
+                  </p>
+                </div>
+                <Switch
+                  id="ativo"
+                  checked={formData.ativo}
+                  onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
+                  data-testid="switch-ativo"
+                />
+              </div>
             </div>
 
             <DialogFooter>
