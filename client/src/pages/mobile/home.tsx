@@ -16,39 +16,50 @@ interface DashboardStats {
 export default function MobileHome() {
   const { user } = useAuth();
 
-  const { data: stats } = useQuery<DashboardStats>({
+  const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
-    enabled: !!user,
+    enabled: !!user && (user.tipo === "super_admin" || user.tipo === "admin"),
   });
 
   const isSuperAdmin = user?.tipo === "super_admin";
   const isAdmin = user?.tipo === "admin" || user?.tipo === "super_admin";
 
+  // Default stats for regular users
+  const defaultStats: DashboardStats = {
+    totalEmpresas: 0,
+    totalClientes: 0,
+    totalCameras: 0,
+    camerasOnline: 0,
+    camerasOffline: 0,
+  };
+
+  const currentStats = stats || defaultStats;
+
   const statCards = [
     {
       title: "Empresas",
-      value: stats?.totalEmpresas || 0,
+      value: currentStats.totalEmpresas,
       icon: Building2,
       show: isSuperAdmin,
       color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Clientes",
-      value: stats?.totalClientes || 0,
+      value: currentStats.totalClientes,
       icon: Users,
       show: isAdmin,
       color: "from-purple-500 to-pink-500",
     },
     {
       title: "Câmeras",
-      value: stats?.totalCameras || 0,
+      value: currentStats.totalCameras,
       icon: Video,
       show: true,
       color: "from-orange-500 to-red-500",
     },
     {
       title: "Online",
-      value: stats?.camerasOnline || 0,
+      value: currentStats.camerasOnline,
       icon: Activity,
       show: true,
       color: "from-green-500 to-emerald-500",
@@ -90,20 +101,20 @@ export default function MobileHome() {
                   <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-sm font-medium text-gray-700">Câmeras Online</span>
                 </div>
-                <span className="text-lg font-bold text-green-600">{stats?.camerasOnline || 0}</span>
+                <span className="text-lg font-bold text-green-600">{currentStats.camerasOnline}</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-red-500" />
                   <span className="text-sm font-medium text-gray-700">Câmeras Offline</span>
                 </div>
-                <span className="text-lg font-bold text-red-600">{stats?.camerasOffline || 0}</span>
+                <span className="text-lg font-bold text-red-600">{currentStats.camerasOffline}</span>
               </div>
               <div className="flex items-center justify-between pt-3 border-t">
                 <span className="text-sm font-semibold text-gray-700">Taxa de Disponibilidade</span>
                 <span className="text-lg font-bold text-green-600">
-                  {stats?.totalCameras
-                    ? Math.round((stats.camerasOnline / stats.totalCameras) * 100)
+                  {currentStats.totalCameras
+                    ? Math.round((currentStats.camerasOnline / currentStats.totalCameras) * 100)
                     : 0}
                   %
                 </span>

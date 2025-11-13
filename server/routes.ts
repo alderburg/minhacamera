@@ -423,12 +423,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== DASHBOARD STATS ====================
 
-  app.get("/api/dashboard/stats", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
+  app.get("/api/dashboard/stats", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
       
-      // Super admin gets global stats, admin gets company stats
-      const empresaId = user.tipo === "super_admin" ? undefined : user.empresaId!;
+      // Super admin gets global stats, admin gets company stats, users get their client stats
+      let empresaId: number | undefined;
+      
+      if (user.tipo === "super_admin") {
+        empresaId = undefined; // All companies
+      } else if (user.tipo === "admin") {
+        empresaId = user.empresaId!;
+      } else if (user.tipo === "user") {
+        // For regular users, get stats from their client's company
+        if (user.clienteId) {
+          const cliente = await storage.getCliente(user.clienteId);
+          empresaId = cliente?.empresaId;
+        }
+      }
+      
       const stats = await storage.getDashboardStats(empresaId);
       
       res.json(stats);

@@ -65,12 +65,8 @@ function PublicRoute({ component: Component, ...rest }: any) {
   }
 
   if (user) {
-    // Redirect based on user type
-    if (user.tipo === "user") {
-      return <Redirect to="/cameras" />;
-    } else {
-      return <Redirect to="/dashboard" />;
-    }
+    // Always redirect to mobile home after login
+    return <Redirect to="/mobile/home" />;
   }
 
   return <Component {...rest} />;
@@ -193,6 +189,27 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 function Router() {
   return (
     <Switch>
+      {/* Root redirect */}
+      <Route path="/">
+        {() => {
+          const { user, isLoading } = useAuth();
+          
+          if (isLoading) {
+            return (
+              <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            );
+          }
+          
+          if (!user) {
+            return <Redirect to="/login" />;
+          }
+          
+          return <Redirect to="/mobile/home" />;
+        }}
+      </Route>
+
       <Route path="/login">
         <PublicRoute component={Login} />
       </Route>
@@ -281,10 +298,6 @@ function Router() {
 
       <Route path="/notificacoes">
         <ProtectedRoute component={Notificacoes} />
-      </Route>
-
-      <Route path="/">
-        <Redirect to="/mobile/home" />
       </Route>
 
       <Route component={NotFound} />
