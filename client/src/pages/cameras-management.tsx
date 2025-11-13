@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -41,6 +42,7 @@ import type { Camera, InsertCamera, Empresa, Cliente, CameraAcesso } from "@shar
 
 export default function CamerasManagement() {
   const { user, isLoading: authLoading } = useRequireAuth(["super_admin", "admin"]);
+  const [location, setLocation] = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -231,6 +233,9 @@ export default function CamerasManagement() {
       resolucaoPreferida: camera.resolucaoPreferida || "720p",
     });
     
+    // Atualizar URL sem reload usando wouter
+    setLocation(`/cameras/edit/${camera.id}`, { replace: false });
+    
     // Abrir diálogo
     setIsDialogOpen(true);
   };
@@ -275,6 +280,8 @@ export default function CamerasManagement() {
   const handleDialogClose = (open: boolean) => {
     if (!open) {
       resetForm();
+      // Voltar para a rota base sem reload
+      setLocation('/cameras', { replace: false });
     }
     setIsDialogOpen(open);
   };
