@@ -135,7 +135,7 @@ export default function MobileCameraForm() {
         subtitle={isEditing ? "Atualize os dados da câmera" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="pt-20 px-4 pb-6">
+      <form onSubmit={handleSubmit} className="pt-20 px-4 pb-6 md:px-4 md:pt-0">
         <div className="space-y-4">
           <div className="bg-white rounded-xl p-4 border border-gray-100">
             <Label htmlFor="nome" className="text-gray-700 font-semibold mb-2 block">

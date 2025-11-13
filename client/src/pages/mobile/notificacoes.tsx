@@ -28,7 +28,7 @@ export default function MobileNotificacoes() {
         subtitle="Alertas e avisos do sistema"
       />
 
-      <div className="pt-20 px-4 md:pt-0 md:px-0">
+      <div className="pt-20 md:pt-0 md:px-0">
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Bell className="h-16 w-16 text-gray-300 mb-4" />
@@ -37,7 +37,7 @@ export default function MobileNotificacoes() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 px-4">
             {notifications.map((notification) => (
               <div
                 key={notification.id}
@@ -64,7 +64,7 @@ export default function MobileNotificacoes() {
         )}
 
         {notifications.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4 px-4">
             <Button variant="outline" className="w-full">
               <CheckCheck className="h-4 w-4 mr-2" />
               Marcar todas como lidas

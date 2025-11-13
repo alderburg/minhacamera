@@ -75,15 +75,15 @@ export default function MobileHome() {
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0 overflow-x-hidden">
       <MobileTopBar showProfile />
 
-      <div className="pt-16 px-4 md:pt-0 md:px-4">
-        <div className="mb-6">
+      <div className="pt-16 md:pt-0 md:px-4">
+        <div className="mb-6 px-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
             Bem-vindo! 👋
           </h1>
           <p className="text-gray-600">Visão geral do sistema MinhaCamera</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-6 -mx-4 px-4">
+        <div className="grid grid-cols-2 gap-3 mb-6 px-4">
           {statCards.map((card) => (
             <Card key={card.title} className="border-0 shadow-sm overflow-hidden">
               <CardContent className="p-0">
@@ -97,7 +97,7 @@ export default function MobileHome() {
           ))}
         </div>
 
-        <Card className="border-0 shadow-sm mb-6 -mx-4 rounded-none">
+        <Card className="border-0 shadow-sm mb-6 rounded-none">
           <CardContent className="p-4">
             <h2 className="font-semibold text-gray-900 mb-4">Status do Sistema</h2>
             <div className="space-y-3">
