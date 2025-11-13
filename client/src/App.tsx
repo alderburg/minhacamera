@@ -206,10 +206,6 @@ function Router() {
         <ProtectedRoute component={MobileMenu} />
       </Route>
 
-      <Route path="/mobile/empresas" exact>
-        <ProtectedRoute component={MobileEmpresasList} />
-      </Route>
-
       <Route path="/mobile/empresas/new">
         <ProtectedRoute component={MobileEmpresaForm} />
       </Route>
@@ -218,8 +214,8 @@ function Router() {
         <ProtectedRoute component={MobileEmpresaForm} />
       </Route>
 
-      <Route path="/mobile/clientes" exact>
-        <ProtectedRoute component={MobileClientesList} />
+      <Route path="/mobile/empresas">
+        <ProtectedRoute component={MobileEmpresasList} />
       </Route>
 
       <Route path="/mobile/clientes/new">
@@ -230,8 +226,8 @@ function Router() {
         <ProtectedRoute component={MobileClienteForm} />
       </Route>
 
-      <Route path="/mobile/cameras" exact>
-        <ProtectedRoute component={MobileCamerasList} />
+      <Route path="/mobile/clientes">
+        <ProtectedRoute component={MobileClientesList} />
       </Route>
 
       <Route path="/mobile/cameras/new">
@@ -240,6 +236,10 @@ function Router() {
 
       <Route path="/mobile/cameras/edit/:id">
         <ProtectedRoute component={MobileCameraForm} />
+      </Route>
+
+      <Route path="/mobile/cameras">
+        <ProtectedRoute component={MobileCamerasList} />
       </Route>
 
       <Route path="/mobile/notificacoes">

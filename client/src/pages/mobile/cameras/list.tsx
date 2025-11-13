@@ -78,7 +78,7 @@ export default function MobileCamerasList() {
                   <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
                     <Video className="h-12 w-12 text-gray-600" />
                     <div className="absolute top-2 right-2">
-                      <CameraStatus isOnline={camera.ativa} />
+                      <CameraStatus online={camera.ativa} />
                     </div>
                   </div>
                   <div className="p-4">

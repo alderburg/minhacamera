@@ -1,7 +1,7 @@
 import { MobileTopBar } from "@/components/mobile-top-bar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { useRoute, useLocation } from "wouter";
-import { useMutation, useQuery } from "@tantml:react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
