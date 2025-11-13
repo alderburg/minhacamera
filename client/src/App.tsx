@@ -193,7 +193,7 @@ function Router() {
   // Reset scroll to top on route change
   const [location] = useLocation();
   const isMobile = useIsMobile();
-  useWebSocket(); // Initialize WebSocket connection
+  // useWebSocket(); // Initialize WebSocket connection - moved to AppContent
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -320,19 +320,28 @@ function Router() {
   );
 }
 
+function AppContent() {
+  useWebSocket(); // Initialize WebSocket connection
+
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <div className="overflow-x-hidden">
-            <AppLayout>
-              <Router />
-            </AppLayout>
-          </div>
-        </AuthProvider>
-        <Toaster />
-      </TooltipProvider>
+      <AuthProvider>
+        <div className="overflow-x-hidden">
+          <AppLayout>
+            <Router />
+          </AppLayout>
+        </div>
+      </AuthProvider>
+      <Toaster />
     </QueryClientProvider>
   );
 }

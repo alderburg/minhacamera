@@ -63,18 +63,25 @@ export function broadcastCameraStatusChange(data: {
   isOnline: boolean;
   timestamp: Date;
 }) {
-  if (!wss) return;
+  if (!wss) {
+    console.log('⚠️ WebSocket server not initialized, cannot broadcast camera status');
+    return;
+  }
 
   const message = JSON.stringify({
     type: 'camera-status-change',
     data,
   });
 
+  let sentCount = 0;
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(message);
+      sentCount++;
     }
   });
+  
+  console.log(`📹 Broadcast camera status change to ${sentCount} client(s):`, data.cameraNome, data.isOnline ? 'ONLINE' : 'OFFLINE');
 }
 
 export function broadcastNotification(notification: {
@@ -84,18 +91,25 @@ export function broadcastNotification(notification: {
   type: string;
   createdAt: Date;
 }) {
-  if (!wss) return;
+  if (!wss) {
+    console.log('⚠️ WebSocket server not initialized, cannot broadcast notification');
+    return;
+  }
 
   const message = JSON.stringify({
     type: 'notification',
     data: notification,
   });
 
+  let sentCount = 0;
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(message);
+      sentCount++;
     }
   });
+  
+  console.log(`🔔 Broadcast notification to ${sentCount} client(s):`, notification.title);
 }
 
 export function getWebSocketServer() {

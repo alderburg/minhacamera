@@ -49,31 +49,32 @@ export function useWebSocket() {
       ws.onmessage = (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
+          console.log('📨 WebSocket message received:', message.type, message.data);
 
           switch (message.type) {
             case 'connected':
-              console.log('WebSocket connection confirmed');
+              console.log('✅ WebSocket connection confirmed');
               break;
 
             case 'camera-status-change':
-              console.log('Camera status changed:', message.data);
+              console.log('📹 Camera status changed:', message.data);
               // Invalidate camera queries to refetch updated status
               queryClient.invalidateQueries({ queryKey: ['/api/cameras'] });
               queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
               break;
 
             case 'notification':
-              console.log('New notification:', message.data);
+              console.log('🔔 New notification:', message.data);
               // Invalidate notification queries
               queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
               queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
               break;
 
             default:
-              console.log('Unknown message type:', message.type);
+              console.log('❓ Unknown message type:', message.type);
           }
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.error('❌ Error parsing WebSocket message:', error);
         }
       };
 

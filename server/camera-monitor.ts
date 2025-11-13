@@ -28,33 +28,41 @@ export async function monitorCameras() {
 
     // Update camera status in database if changed
     if (wasOnline !== isOnline) {
-      await db
-        .update(cameras)
-        .set({ online: isOnline })
-        .where(eq(cameras.id, camera.id));
+      try {
+        await db
+          .update(cameras)
+          .set({ online: isOnline })
+          .where(eq(cameras.id, camera.id));
 
-      // Notify listeners
-      const statusChange: CameraStatusChange = {
-        cameraId: camera.id,
-        cameraNome: camera.nome,
-        wasOnline,
-        isOnline,
-        timestamp: new Date(),
-      };
+        // Notify listeners
+        const statusChange: CameraStatusChange = {
+          cameraId: camera.id,
+          cameraNome: camera.nome,
+          wasOnline,
+          isOnline,
+          timestamp: new Date(),
+        };
 
-      statusChangeListeners.forEach(listener => {
-        try {
-          listener(statusChange);
-        } catch (error) {
-          console.error('Error in status change listener:', error);
-        }
-      });
+        statusChangeListeners.forEach(listener => {
+          try {
+            listener(statusChange);
+          } catch (error) {
+            console.error('Error in status change listener:', error);
+          }
+        });
+      } catch (error) {
+        console.error(`Error updating camera ${camera.id} status:`, error);
+      }
     } else if (camera.online !== isOnline) {
       // Update even if same status but database is outdated
-      await db
-        .update(cameras)
-        .set({ online: isOnline })
-        .where(eq(cameras.id, camera.id));
+      try {
+        await db
+          .update(cameras)
+          .set({ online: isOnline })
+          .where(eq(cameras.id, camera.id));
+      } catch (error) {
+        console.error(`Error updating camera ${camera.id} status:`, error);
+      }
     }
   }
 }
