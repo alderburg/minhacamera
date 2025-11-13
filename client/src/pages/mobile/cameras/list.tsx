@@ -21,6 +21,7 @@ export default function MobileCamerasList() {
 
   const { data: cameras, isLoading } = useQuery<Camera[]>({
     queryKey: ["/api/cameras"],
+    refetchInterval: 15000, // Refresh every 15 seconds to update camera status
   });
 
   const deleteMutation = useMutation({

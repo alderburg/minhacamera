@@ -17,6 +17,14 @@ import { startCameraStream, stopCameraStream, getStreamPath, getStreamDir } from
 import { checkMultipleCameras } from './camera-health';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { db } from "./db";
+import { users, empresas, clientes, cameras, cameraAcessos } from "@shared/schema";
+import { eq, and, or } from "drizzle-orm";
+import { hash, compare } from "bcryptjs";
+import { setupAuth } from "./middleware";
+import { isAdmin, isSuperAdmin, requireAuth } from "./middleware";
+import { checkCameraHealth } from "./camera-health";
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from "./notifications";
 
 const JWT_SECRET = process.env.SESSION_SECRET || "your-secret-key-change-in-production";
 
@@ -162,19 +170,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const subdomain = req.params.subdomain.toLowerCase().trim();
       const fullDomain = `${subdomain}.minhacamera.com`;
-      
+
       // Validate subdomain format (only alphanumeric and hyphens)
       if (!/^[a-z0-9-]+$/.test(subdomain)) {
         return res.json({ available: false, message: "Use apenas letras, números e hífen" });
       }
-      
+
       // Check if domain already exists
       const existingEmpresa = await storage.getEmpresaByDominio(fullDomain);
-      
+
       if (existingEmpresa) {
         return res.json({ available: false, message: "Subdomínio já está em uso" });
       }
-      
+
       res.json({ available: true, message: "Subdomínio disponível" });
     } catch (error) {
       console.error("Check subdomain error:", error);
@@ -187,11 +195,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/clientes", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
-      
+
       // Super admin sees all, admin sees only their company's clients
       const empresaId = user.tipo === "super_admin" ? undefined : user.empresaId!;
       const clientes = await storage.getAllClientes(empresaId);
-      
+
       res.json(clientes);
     } catch (error) {
       console.error("Get clientes error:", error);
@@ -204,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user!;
       const id = parseInt(req.params.id);
       const cliente = await storage.getCliente(id);
-      
+
       if (!cliente) {
         return res.status(404).json({ message: "Cliente não encontrado" });
       }
@@ -213,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (user.tipo === "admin" && user.empresaId && cliente.empresaId !== user.empresaId) {
         return res.status(403).json({ message: "Sem permissão para visualizar este cliente" });
       }
-      
+
       res.json(cliente);
     } catch (error) {
       console.error("Get cliente error:", error);
@@ -335,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user!;
       const id = parseInt(req.params.id);
       const camera = await storage.getCamera(id);
-      
+
       if (!camera) {
         return res.status(404).json({ message: "Câmera não encontrada" });
       }
@@ -345,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Super admins can access all cameras
         return res.json(camera);
       }
-      
+
       if (user.tipo === "admin") {
         // Admins can only access cameras from their company
         if (!user.empresaId || camera.empresaId !== user.empresaId) {
@@ -353,7 +361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         return res.json(camera);
       }
-      
+
       // Users can only access cameras they have permission for
       if (!user.clienteId) {
         return res.status(403).json({ message: "Sem permissão para visualizar esta câmera" });
@@ -362,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!hasAccess) {
         return res.status(403).json({ message: "Sem permissão para visualizar esta câmera" });
       }
-      
+
       res.json(camera);
     } catch (error) {
       console.error("Get camera error:", error);
@@ -373,7 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cameras", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
-      
+
       // If admin (not super_admin), inject empresaId before validation
       if (user.tipo === "admin") {
         if (!user.empresaId) {
@@ -381,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         req.body.empresaId = user.empresaId;
       }
-      
+
       const cameraData = insertCameraSchema.parse(req.body);
 
       // Validate empresa exists
@@ -416,7 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         req.body.empresaId = user.empresaId;
       }
-      
+
       const cameraData = insertCameraSchema.parse(req.body);
 
       const camera = await storage.updateCamera(id, cameraData);
@@ -505,10 +513,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/dashboard/stats", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
-      
+
       // Super admin gets global stats, admin gets company stats, users get their client stats
       let empresaId: number | undefined;
-      
+
       if (user.tipo === "super_admin") {
         empresaId = undefined; // All companies
       } else if (user.tipo === "admin") {
@@ -520,9 +528,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           empresaId = cliente?.empresaId;
         }
       }
-      
+
       const stats = await storage.getDashboardStats(empresaId);
-      
+
       res.json(stats);
     } catch (error) {
       console.error("Get stats error:", error);
@@ -587,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const cameraId = parseInt(req.params.cameraId);
       const streamDir = getStreamDir(cameraId);
-      
+
       if (!streamDir) {
         return res.status(404).json({ message: "Stream não iniciado" });
       }
@@ -611,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cameraId = parseInt(req.params.cameraId);
       const segment = req.params.segment;
       const streamDir = getStreamDir(cameraId);
-      
+
       if (!streamDir) {
         return res.status(404).json({ message: "Stream não iniciado" });
       }
@@ -626,6 +634,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Segment error:", error);
       res.status(500).json({ message: "Erro ao acessar segmento" });
+    }
+  });
+
+  // Notifications endpoints
+  app.get("/api/notifications", requireAuth, async (req, res) => {
+    const notifications = getNotifications();
+    res.json(notifications);
+  });
+
+  app.get("/api/notifications/unread-count", requireAuth, async (req, res) => {
+    const count = getUnreadCount();
+    res.json({ count });
+  });
+
+  app.post("/api/notifications/:id/read", requireAuth, async (req, res) => {
+    const id = parseInt(req.params.id);
+    const success = markNotificationAsRead(id);
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ message: "Notification not found" });
+    }
+  });
+
+  app.post("/api/notifications/read-all", requireAuth, async (req, res) => {
+    markAllNotificationsAsRead();
+    res.json({ success: true });
+  });
+
+  // Dashboard stats
+  app.get("/api/dashboard/stats", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+
+      // Super admin gets global stats, admin gets company stats, users get their client stats
+      let empresaId: number | undefined;
+
+      if (user.tipo === "super_admin") {
+        empresaId = undefined; // All companies
+      } else if (user.tipo === "admin") {
+        empresaId = user.empresaId!;
+      } else if (user.tipo === "user") {
+        // For regular users, get stats from their client's company
+        if (user.clienteId) {
+          const cliente = await storage.getCliente(user.clienteId);
+          empresaId = cliente?.empresaId;
+        }
+      }
+
+      const stats = await storage.getDashboardStats(empresaId);
+
+      res.json(stats);
+    } catch (error) {
+      console.error("Get stats error:", error);
+      res.status(500).json({ message: "Erro ao buscar estatísticas" });
     }
   });
 

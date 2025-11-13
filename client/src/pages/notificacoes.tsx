@@ -3,6 +3,31 @@ import { Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useRequireAuth } from "@/lib/auth";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+  read: boolean;
+  createdAt: string;
+}
+
+function formatTimeAgo(date: string): string {
+  const now = new Date();
+  const past = new Date(date);
+  const diffMs = now.getTime() - past.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Agora";
+  if (diffMins < 60) return `${diffMins} minuto${diffMins > 1 ? 's' : ''} atrás`;
+  if (diffHours < 24) return `${diffHours} hora${diffHours > 1 ? 's' : ''} atrás`;
+  return `${diffDays} dia${diffDays > 1 ? 's' : ''} atrás`;
+}
 
 export default function Notificacoes() {
   const { user, isLoading } = useRequireAuth();
@@ -11,43 +36,38 @@ export default function Notificacoes() {
     window.scrollTo(0, 0);
   }, []);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Nova câmera adicionada",
-      message: "A câmera 'Entrada Principal' foi adicionada com sucesso ao sistema.",
-      time: "5 minutos atrás",
-      read: false,
-      type: "success",
+  const { data: notifications = [], refetch } = useQuery<Notification[]>({
+    queryKey: ["/api/notifications"],
+    enabled: !!user,
+    refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
+  const markAsReadMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("POST", `/api/notifications/${id}/read`);
     },
-    {
-      id: 2,
-      title: "Câmera offline",
-      message: "A câmera 'Estacionamento' está offline há 2 horas.",
-      time: "2 horas atrás",
-      read: false,
-      type: "warning",
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
     },
-    {
-      id: 3,
-      title: "Manutenção programada",
-      message: "Manutenção programada do sistema para amanhã às 02:00.",
-      time: "1 dia atrás",
-      read: true,
-      type: "info",
+  });
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/notifications/read-all");
     },
-  ]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+    },
+  });
 
   const markAsRead = (id: number) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
+    markAsReadMutation.mutate(id);
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(n => ({ ...n, read: true }))
-    );
+    markAllAsReadMutation.mutate();
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -87,6 +107,11 @@ export default function Notificacoes() {
               key={notification.id}
               className={`cursor-pointer transition-all hover:shadow-md ${
                 !notification.read ? 'border-l-4 border-l-blue-500 bg-accent/20' : ''
+              } ${
+                notification.type === 'error' ? 'border-l-red-500' : 
+                notification.type === 'warning' ? 'border-l-orange-500' : 
+                notification.type === 'success' ? 'border-l-green-500' : 
+                'border-l-blue-500'
               }`}
               onClick={() => markAsRead(notification.id)}
             >
@@ -109,7 +134,7 @@ export default function Notificacoes() {
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-xs text-muted-foreground">
-                  {notification.time}
+                  {formatTimeAgo(notification.createdAt)}
                 </p>
               </CardContent>
             </Card>

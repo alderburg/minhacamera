@@ -30,6 +30,7 @@ export default function CamerasView() {
   const { data: cameras, isLoading } = useQuery<Camera[]>({
     queryKey: ["/api/cameras"],
     enabled: !!user,
+    refetchInterval: 15000, // Refresh every 15 seconds to update camera status
   });
 
   if (authLoading || isLoading) {

@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { startCameraMonitoring, onCameraStatusChange } from "./camera-monitor";
+import { createNotification } from "./notifications";
 
 const app = express();
 
@@ -77,5 +79,29 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Start camera monitoring
+    startCameraMonitoring(30000); // Check every 30 seconds
+    
+    // Listen for camera status changes
+    onCameraStatusChange((change) => {
+      if (!change.isOnline && change.wasOnline) {
+        // Camera went offline
+        createNotification(
+          'Câmera Offline',
+          `A câmera "${change.cameraNome}" está offline.`,
+          'error'
+        );
+        log(`Camera ${change.cameraNome} went OFFLINE`);
+      } else if (change.isOnline && !change.wasOnline) {
+        // Camera came back online
+        createNotification(
+          'Câmera Online',
+          `A câmera "${change.cameraNome}" voltou a ficar online.`,
+          'success'
+        );
+        log(`Camera ${change.cameraNome} is back ONLINE`);
+      }
+    });
   });
 })();

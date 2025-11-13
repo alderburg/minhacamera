@@ -1,24 +1,28 @@
 interface CameraStatusProps {
-  online: boolean;
+  online: boolean | null;
   showLabel?: boolean;
 }
 
 export function CameraStatus({ online, showLabel = true }: CameraStatusProps) {
+  const isOnline = online ?? false;
+  
   return (
     <div className="flex items-center gap-2">
       <div className="relative">
         <div
           className={`h-2 w-2 rounded-full ${
-            online ? "bg-status-online" : "bg-status-offline"
+            isOnline ? "bg-green-500" : "bg-red-500"
           }`}
         />
-        {online && (
-          <div className="absolute inset-0 h-2 w-2 rounded-full bg-status-online animate-ping opacity-75" />
+        {isOnline && (
+          <div className="absolute inset-0 h-2 w-2 rounded-full bg-green-500 animate-ping opacity-75" />
         )}
       </div>
       {showLabel && (
-        <span className="text-xs font-medium text-muted-foreground">
-          {online ? "Online" : "Offline"}
+        <span className={`text-xs font-medium ${
+          isOnline ? "text-green-600" : "text-red-600"
+        }`}>
+          {isOnline ? "Online" : "Offline"}
         </span>
       )}
     </div>
