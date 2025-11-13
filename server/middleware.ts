@@ -9,14 +9,17 @@ export interface AuthRequest extends Request {
 }
 
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
-  console.log('Auth check - Path:', req.path);
-  console.log('Auth check - Cookies:', req.cookies);
-  console.log('Auth check - Headers Cookie:', req.headers.cookie);
+  console.log('=== AUTH CHECK START ===');
+  console.log('Path:', req.path);
+  console.log('All Cookies:', req.cookies);
+  console.log('Token Cookie:', req.cookies?.token);
+  console.log('Raw Cookie Header:', req.headers.cookie);
+  console.log('=== AUTH CHECK END ===');
   
   const token = req.cookies?.token;
 
   if (!token) {
-    console.log('No token found in cookies');
+    console.log('❌ No token found in cookies');
     return res.status(401).json({ message: "Não autenticado" });
   }
 

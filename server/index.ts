@@ -10,7 +10,10 @@ declare module 'http' {
     rawBody: unknown
   }
 }
+
+// IMPORTANTE: cookie-parser DEVE vir ANTES de qualquer outra rota
 app.use(cookieParser());
+
 app.use(express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;

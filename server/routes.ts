@@ -58,7 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         path: "/",
       });
 
-      console.log('Token cookie set successfully');
+      console.log('✅ Cookie set with token:', token.substring(0, 20) + '...');
+      console.log('Cookie options:', { httpOnly: true, secure: false, sameSite: 'lax', path: '/' });
 
       // Return user without password
       const { senha: _, ...userWithoutPassword } = user;
