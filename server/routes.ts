@@ -105,6 +105,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/empresas/:id", authenticateToken, requireRole("super_admin"), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const empresa = await storage.getEmpresa(id);
+      if (!empresa) {
+        return res.status(404).json({ message: "Empresa não encontrada" });
+      }
+      res.json(empresa);
+    } catch (error) {
+      console.error("Get empresa error:", error);
+      res.status(500).json({ message: "Erro ao buscar empresa" });
+    }
+  });
+
   app.post("/api/empresas", authenticateToken, requireRole("super_admin"), async (req: AuthRequest, res) => {
     try {
       const empresaData = insertEmpresaSchema.parse(req.body);
@@ -181,6 +195,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get clientes error:", error);
       res.status(500).json({ message: "Erro ao buscar clientes" });
+    }
+  });
+
+  app.get("/api/clientes/:id", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      const id = parseInt(req.params.id);
+      const cliente = await storage.getCliente(id);
+      
+      if (!cliente) {
+        return res.status(404).json({ message: "Cliente não encontrado" });
+      }
+
+      // If admin, verify cliente belongs to their company
+      if (user.tipo === "admin" && user.empresaId && cliente.empresaId !== user.empresaId) {
+        return res.status(403).json({ message: "Sem permissão para visualizar este cliente" });
+      }
+      
+      res.json(cliente);
+    } catch (error) {
+      console.error("Get cliente error:", error);
+      res.status(500).json({ message: "Erro ao buscar cliente" });
     }
   });
 
@@ -290,6 +326,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get cameras error:", error);
       res.status(500).json({ message: "Erro ao buscar câmeras" });
+    }
+  });
+
+  app.get("/api/cameras/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      const id = parseInt(req.params.id);
+      const camera = await storage.getCamera(id);
+      
+      if (!camera) {
+        return res.status(404).json({ message: "Câmera não encontrada" });
+      }
+
+      // Verify permissions based on user type
+      if (user.tipo === "super_admin") {
+        // Super admins can access all cameras
+        return res.json(camera);
+      }
+      
+      if (user.tipo === "admin") {
+        // Admins can only access cameras from their company
+        if (!user.empresaId || camera.empresaId !== user.empresaId) {
+          return res.status(403).json({ message: "Sem permissão para visualizar esta câmera" });
+        }
+        return res.json(camera);
+      }
+      
+      // Users can only access cameras they have permission for
+      if (!user.clienteId) {
+        return res.status(403).json({ message: "Sem permissão para visualizar esta câmera" });
+      }
+      const hasAccess = await storage.clienteHasAccessToCamera(user.clienteId, id);
+      if (!hasAccess) {
+        return res.status(403).json({ message: "Sem permissão para visualizar esta câmera" });
+      }
+      
+      res.json(camera);
+    } catch (error) {
+      console.error("Get camera error:", error);
+      res.status(500).json({ message: "Erro ao buscar câmera" });
     }
   });
 

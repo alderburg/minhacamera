@@ -57,7 +57,7 @@ export default function MobileCameraForm() {
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
 
   const { data: camera, isLoading: isLoadingCamera } = useQuery<Camera>({
-    queryKey: [`/api/cameras/${cameraId}`],
+    queryKey: ["/api/cameras", cameraId?.toString() || ""],
     enabled: !!cameraId,
   });
 

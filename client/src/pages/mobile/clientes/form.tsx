@@ -43,7 +43,7 @@ export default function MobileClienteForm() {
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
 
   const { data: cliente, isLoading: isLoadingCliente } = useQuery<Cliente>({
-    queryKey: [`/api/clientes/${clienteId}`],
+    queryKey: ["/api/clientes", clienteId?.toString() || ""],
     enabled: !!clienteId,
   });
 

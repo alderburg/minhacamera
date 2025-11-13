@@ -47,7 +47,7 @@ export default function MobileEmpresaForm() {
   });
 
   const { data: empresa, isLoading: isLoadingEmpresa } = useQuery<Empresa>({
-    queryKey: [`/api/empresas/${empresaId}`],
+    queryKey: ["/api/empresas", empresaId?.toString() || ""],
     enabled: !!empresaId,
   });
 
