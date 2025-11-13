@@ -1,12 +1,14 @@
 import { MobileTopBar } from "@/components/mobile-top-bar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, Search, Video, MapPin, Pencil } from "lucide-react";
+import { Plus, Search, Video, MapPin, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Camera } from "@shared/schema";
 
 export default function MobileCamerasList() {
@@ -24,6 +26,35 @@ export default function MobileCamerasList() {
     camera.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     camera.localizacao?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
+
+  const { toast } = useToast();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/cameras/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cameras"] });
+      toast({
+        title: "Câmera excluída",
+        description: "A câmera foi excluída com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir câmera",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleDelete = (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    if (window.confirm("Tem certeza que deseja excluir esta câmera?")) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
@@ -77,19 +108,30 @@ export default function MobileCamerasList() {
         ) : (
           <div className="space-y-3 px-4">
             {filteredCameras.map((camera) => (
-              <Link key={camera.id} href={`/mobile/cameras/edit/${camera.id}`}>
-                <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:bg-gray-50 transition-colors">
-                  <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
-                    <Video className="h-12 w-12 text-gray-600" />
-                    <div className="absolute top-2 right-2">
-                      <CameraStatus online={camera.ativa} />
+              <div key={camera.id} className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:bg-gray-50 transition-colors">
+                <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative">
+                  <Video className="h-12 w-12 text-gray-600" />
+                  <div className="absolute top-2 right-2">
+                    <CameraStatus online={camera.ativa} />
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-semibold text-gray-900 truncate">{camera.nome}</h3>
+                    <div className="flex items-center gap-2">
+                      <Link href={`/mobile/cameras/edit/${camera.id}`}>
+                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Pencil className="h-4 w-4 text-gray-600" />
+                        </button>
+                      </Link>
+                      <button 
+                        onClick={(e) => handleDelete(e, camera.id)}
+                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </button>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="font-semibold text-gray-900 truncate">{camera.nome}</h3>
-                      <Pencil className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    </div>
                     {camera.localizacao && (
                       <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
                         <MapPin className="h-3.5 w-3.5" />
@@ -115,7 +157,7 @@ export default function MobileCamerasList() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

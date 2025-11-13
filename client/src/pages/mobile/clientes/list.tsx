@@ -1,12 +1,14 @@
 import { MobileTopBar } from "@/components/mobile-top-bar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, Search, Users, Mail, Phone, Pencil, CheckCircle2, XCircle } from "lucide-react";
+import { Plus, Search, Users, Mail, Phone, Pencil, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Cliente } from "@shared/schema";
 
 export default function MobileClientesList() {
@@ -32,6 +34,35 @@ export default function MobileClientesList() {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const { toast } = useToast();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/clientes/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clientes"] });
+      toast({
+        title: "Cliente excluído",
+        description: "O cliente foi excluído com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir cliente",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleDelete = (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    if (window.confirm("Tem certeza que deseja excluir este cliente?")) {
+      deleteMutation.mutate(id);
+    }
   };
 
   return (
@@ -86,19 +117,30 @@ export default function MobileClientesList() {
         ) : (
           <div className="space-y-3 px-4">
             {filteredClientes.map((cliente) => (
-              <Link key={cliente.id} href={`/mobile/clientes/edit/${cliente.id}`}>
-                <div className="bg-white rounded-xl p-4 border border-gray-100 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-12 w-12 border-2 border-pink-100 flex-shrink-0">
-                      <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-500 text-white font-semibold">
-                        {getInitials(cliente.nome)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900 truncate">{cliente.nome}</h3>
-                        <Pencil className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <div key={cliente.id} className="bg-white rounded-xl p-4 border border-gray-100 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-12 w-12 border-2 border-blue-100 flex-shrink-0">
+                    <AvatarFallback className="bg-blue-600 text-white font-semibold">
+                      {getInitials(cliente.nome)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900 truncate">{cliente.nome}</h3>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/mobile/clientes/edit/${cliente.id}`}>
+                          <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                            <Pencil className="h-4 w-4 text-gray-600" />
+                          </button>
+                        </Link>
+                        <button 
+                          onClick={(e) => handleDelete(e, cliente.id)}
+                          className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </button>
                       </div>
+                    </div>
                       {cliente.email && (
                         <div className="flex items-center gap-1 text-sm text-gray-500 mb-1">
                           <Mail className="h-3.5 w-3.5" />
@@ -127,7 +169,7 @@ export default function MobileClientesList() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

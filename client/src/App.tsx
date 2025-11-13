@@ -292,7 +292,10 @@ function Router() {
       </Route>
 
       <Route path="/perfil">
-        <ProtectedRoute component={Perfil} />
+        {() => {
+          const isMobile = window.innerWidth < 768;
+          return <ProtectedRoute component={isMobile ? require("@/pages/mobile/perfil").default : Perfil} />;
+        }}
       </Route>
 
       <Route path="/notificacoes">

@@ -21,8 +21,8 @@ export default function MobileNotificacoes() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
-      <MobileTopBar 
-        showBack 
+      <MobileTopBar
+        showBack
         backUrl="/dashboard"
         title="Notificações"
         subtitle="Alertas e avisos do sistema"
@@ -42,11 +42,11 @@ export default function MobileNotificacoes() {
               <div
                 key={notification.id}
                 className={`bg-white rounded-xl p-4 border ${
-                  !notification.read ? 'border-pink-200 bg-pink-50' : 'border-gray-100'
+                  !notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-100'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
                     <Bell className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
