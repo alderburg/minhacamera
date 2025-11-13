@@ -8,9 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, Building2, X, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Cliente, InsertCliente, Empresa } from "@shared/schema";
 
@@ -41,6 +40,9 @@ export default function MobileClienteForm() {
     ativo: true,
   });
 
+  const [empresaSearchTerm, setEmpresaSearchTerm] = useState("");
+  const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -54,8 +56,15 @@ export default function MobileClienteForm() {
         empresaId: cliente.empresaId,
         ativo: cliente.ativo,
       });
+
+      // Buscar e definir a empresa selecionada
+      const empresa = empresas?.find(e => e.id === cliente.empresaId);
+      if (empresa) {
+        setSelectedEmpresa(empresa);
+        setEmpresaSearchTerm(empresa.nome);
+      }
     }
-  }, [cliente, clienteId]);
+  }, [cliente, clienteId, empresas]);
 
   if (isEditing && isLoadingCliente) {
     return (
@@ -97,6 +106,27 @@ export default function MobileClienteForm() {
       });
     },
   });
+
+  const handleSelectEmpresa = (empresa: Empresa) => {
+    setSelectedEmpresa(empresa);
+    setFormData({ ...formData, empresaId: empresa.id });
+    setEmpresaSearchTerm(empresa.nome);
+  };
+
+  const handleRemoveEmpresa = () => {
+    setSelectedEmpresa(null);
+    setFormData({ ...formData, empresaId: 0 });
+    setEmpresaSearchTerm("");
+  };
+
+  const filteredEmpresas = empresas?.filter((empresa) => {
+    if (!empresaSearchTerm) return true;
+    const search = empresaSearchTerm.toLowerCase();
+    return (
+      empresa.nome.toLowerCase().includes(search) ||
+      empresa.dominio?.toLowerCase().includes(search)
+    );
+  }).filter((empresa) => !selectedEmpresa || empresa.id !== selectedEmpresa.id);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,26 +196,71 @@ export default function MobileClienteForm() {
             />
           </div>
 
-          {isSuperAdmin && empresas && (
+          {isSuperAdmin && (
             <div className="space-y-2">
-              <Label htmlFor="empresaId" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="empresa" className="text-sm font-medium text-gray-700">
                 Empresa <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={formData.empresaId?.toString()}
-                onValueChange={(value) => setFormData({ ...formData, empresaId: parseInt(value) })}
-              >
-                <SelectTrigger className="h-12 bg-white" data-testid="select-empresa">
-                  <SelectValue placeholder="Selecione uma empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  {empresas.map((empresa) => (
-                    <SelectItem key={empresa.id} value={empresa.id.toString()}>
-                      {empresa.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+              {selectedEmpresa ? (
+                <div className="flex items-center gap-2 p-3 rounded-md border bg-white">
+                  <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{selectedEmpresa.nome}</p>
+                    {selectedEmpresa.dominio && (
+                      <p className="text-xs text-muted-foreground truncate">{selectedEmpresa.dominio}</p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 flex-shrink-0"
+                    onClick={handleRemoveEmpresa}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Input
+                    id="empresa"
+                    placeholder="Buscar empresa por nome ou domínio..."
+                    value={empresaSearchTerm}
+                    onChange={(e) => setEmpresaSearchTerm(e.target.value)}
+                    className="h-12 bg-white"
+                    data-testid="input-empresa-search"
+                  />
+
+                  {empresaSearchTerm && filteredEmpresas && filteredEmpresas.length > 0 && (
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2 bg-white">
+                      {filteredEmpresas.map((empresa) => (
+                        <div
+                          key={empresa.id}
+                          className="flex items-center gap-3 p-3 rounded-md hover:bg-gray-50 active:bg-gray-100 cursor-pointer"
+                          onClick={() => handleSelectEmpresa(empresa)}
+                          data-testid={`search-result-empresa-${empresa.id}`}
+                        >
+                          <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{empresa.nome}</p>
+                            {empresa.dominio && (
+                              <p className="text-xs text-muted-foreground truncate">{empresa.dominio}</p>
+                            )}
+                          </div>
+                          <Plus className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {empresaSearchTerm && filteredEmpresas && filteredEmpresas.length === 0 && (
+                    <div className="text-center py-4 text-sm text-muted-foreground border rounded-lg bg-white">
+                      Nenhuma empresa encontrada
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
