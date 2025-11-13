@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users, Search, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -910,6 +911,25 @@ export default function CamerasManagement() {
                 <p className="text-xs text-muted-foreground">
                   Para compressão futura
                 </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-4 rounded-md border bg-muted/50">
+                <div className="flex-1">
+                  <Label htmlFor="ativa" className="text-sm font-medium cursor-pointer">
+                    Status da Câmera
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formData.ativa ? "Câmera ativa no sistema" : "Câmera inativa no sistema"}
+                  </p>
+                </div>
+                <Switch
+                  id="ativa"
+                  checked={formData.ativa}
+                  onCheckedChange={(checked) => setFormData({ ...formData, ativa: checked })}
+                  data-testid="switch-ativa"
+                />
               </div>
             </div>
             </div>
