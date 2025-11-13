@@ -139,6 +139,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check subdomain availability
+  app.get("/api/empresas/check-subdomain/:subdomain", authenticateToken, requireRole("super_admin"), async (req: AuthRequest, res) => {
+    try {
+      const subdomain = req.params.subdomain.toLowerCase().trim();
+      const fullDomain = `${subdomain}.minhacamera.com`;
+      
+      // Validate subdomain format (only alphanumeric and hyphens)
+      if (!/^[a-z0-9-]+$/.test(subdomain)) {
+        return res.json({ available: false, message: "Use apenas letras, números e hífen" });
+      }
+      
+      // Check if domain already exists
+      const existingEmpresa = await storage.getEmpresaByDominio(fullDomain);
+      
+      if (existingEmpresa) {
+        return res.json({ available: false, message: "Subdomínio já está em uso" });
+      }
+      
+      res.json({ available: true, message: "Subdomínio disponível" });
+    } catch (error) {
+      console.error("Check subdomain error:", error);
+      res.status(500).json({ available: false, message: "Erro ao verificar disponibilidade" });
+    }
+  });
+
   // ==================== CLIENTES ROUTES ====================
 
   app.get("/api/clientes", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {

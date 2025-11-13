@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRequireAuth } from "@/lib/auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Building2, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Plus, Building2, Loader2, Pencil, Trash2, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Empresa, InsertEmpresa } from "@shared/schema";
 
@@ -35,6 +35,12 @@ export default function Empresas() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
   const [deletingEmpresa, setDeletingEmpresa] = useState<Empresa | null>(null);
+  const [subdomain, setSubdomain] = useState("");
+  const [subdomainStatus, setSubdomainStatus] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    message: string;
+  }>({ checking: false, available: null, message: "" });
   const [formData, setFormData] = useState<InsertEmpresa>({
     nome: "",
     logo: "",
@@ -96,13 +102,68 @@ export default function Empresas() {
     },
   });
 
+  const checkSubdomainAvailability = useCallback(async (sub: string) => {
+    if (!sub || sub.length < 3) {
+      setSubdomainStatus({ checking: false, available: null, message: "" });
+      return;
+    }
+
+    setSubdomainStatus({ checking: true, available: null, message: "" });
+
+    try {
+      const response = await fetch(`/api/empresas/check-subdomain/${sub}`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setSubdomainStatus({ 
+        checking: false, 
+        available: data.available, 
+        message: data.message 
+      });
+    } catch (error) {
+      setSubdomainStatus({ 
+        checking: false, 
+        available: false, 
+        message: "Erro ao verificar disponibilidade" 
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (subdomain && !editingEmpresa) {
+        checkSubdomainAvailability(subdomain);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [subdomain, editingEmpresa, checkSubdomainAvailability]);
+
+  const handleSubdomainChange = (value: string) => {
+    const cleanValue = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    setSubdomain(cleanValue);
+    setFormData({ ...formData, dominio: `${cleanValue}.minhacamera.com` });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!editingEmpresa && subdomainStatus.available === false) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "O subdomínio escolhido não está disponível",
+      });
+      return;
+    }
+    
     createMutation.mutate(formData);
   };
 
   const handleEdit = (empresa: Empresa) => {
     setEditingEmpresa(empresa);
+    const currentSubdomain = empresa.dominio ? empresa.dominio.replace('.minhacamera.com', '') : '';
+    setSubdomain(currentSubdomain);
     setFormData({
       nome: empresa.nome,
       logo: empresa.logo || "",
@@ -126,6 +187,8 @@ export default function Empresas() {
   const handleDialogClose = (open: boolean) => {
     if (!open) {
       setEditingEmpresa(null);
+      setSubdomain("");
+      setSubdomainStatus({ checking: false, available: null, message: "" });
       setFormData({ nome: "", logo: "", dominio: "", ativo: true });
     }
     setIsDialogOpen(open);
@@ -245,17 +308,47 @@ export default function Empresas() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dominio">Domínio (opcional)</Label>
-              <Input
-                id="dominio"
-                placeholder="Ex: seguranca.minhacamera.com"
-                value={formData.dominio || ""}
-                onChange={(e) => setFormData({ ...formData, dominio: e.target.value })}
-                data-testid="input-empresa-dominio"
-              />
-              <p className="text-xs text-muted-foreground">
-                Domínio personalizado para white-label
-              </p>
+              <Label htmlFor="subdomain">Subdomínio</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    id="subdomain"
+                    placeholder="empresa"
+                    value={subdomain}
+                    onChange={(e) => handleSubdomainChange(e.target.value)}
+                    disabled={!!editingEmpresa}
+                    data-testid="input-empresa-subdomain"
+                    className="pr-10"
+                  />
+                  {!editingEmpresa && subdomain.length >= 3 && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {subdomainStatus.checking ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      ) : subdomainStatus.available === true ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      ) : subdomainStatus.available === false ? (
+                        <XCircle className="h-4 w-4 text-destructive" />
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+                <span className="text-muted-foreground whitespace-nowrap">.minhacamera.com</span>
+              </div>
+              {!editingEmpresa && subdomainStatus.message && (
+                <p className={`text-xs ${subdomainStatus.available ? 'text-green-600' : 'text-destructive'}`}>
+                  {subdomainStatus.message}
+                </p>
+              )}
+              {editingEmpresa && (
+                <p className="text-xs text-muted-foreground">
+                  O subdomínio não pode ser alterado após a criação
+                </p>
+              )}
+              {!editingEmpresa && (
+                <p className="text-xs text-muted-foreground">
+                  Use apenas letras minúsculas, números e hífen
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

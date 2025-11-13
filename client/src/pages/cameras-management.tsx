@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users } from "lucide-react";
+import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
@@ -47,6 +47,7 @@ export default function CamerasManagement() {
   const [deletingCamera, setDeletingCamera] = useState<Camera | null>(null);
   const [fullscreenCamera, setFullscreenCamera] = useState<Camera | null>(null);
   const [selectedClientes, setSelectedClientes] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
     urlRtsp: "",
@@ -211,16 +212,29 @@ export default function CamerasManagement() {
 
   const openAccessDialog = (camera: Camera) => {
     setSelectedCamera(camera);
+    setSearchTerm("");
     setIsAccessDialogOpen(true);
   };
 
-  const toggleClienteAccess = (clienteId: number) => {
-    setSelectedClientes((prev) =>
-      prev.includes(clienteId)
-        ? prev.filter((id) => id !== clienteId)
-        : [...prev, clienteId]
-    );
+  const addClienteAccess = (clienteId: number) => {
+    if (!selectedClientes.includes(clienteId)) {
+      setSelectedClientes((prev) => [...prev, clienteId]);
+      setSearchTerm("");
+    }
   };
+
+  const removeClienteAccess = (clienteId: number) => {
+    setSelectedClientes((prev) => prev.filter((id) => id !== clienteId));
+  };
+
+  const filteredClientes = clientes?.filter((cliente) => {
+    if (!searchTerm) return false;
+    const search = searchTerm.toLowerCase();
+    return (
+      cliente.nome.toLowerCase().includes(search) ||
+      cliente.email.toLowerCase().includes(search)
+    );
+  }).filter((cliente) => !selectedClientes.includes(cliente.id));
 
   if (authLoading || isLoading) {
     return (
@@ -566,35 +580,95 @@ export default function CamerasManagement() {
       </AlertDialog>
 
       <Dialog open={isAccessDialogOpen} onOpenChange={setIsAccessDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Gerenciar Acessos</DialogTitle>
             <DialogDescription>
-              {selectedCamera?.nome} - Selecione os clientes que podem visualizar esta câmera
+              {selectedCamera?.nome} - Pesquise e selecione os clientes que podem visualizar esta câmera
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAccessSubmit} className="space-y-4">
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">
-              {clientes?.map((cliente) => (
-                <div
-                  key={cliente.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border hover-elevate cursor-pointer"
-                  onClick={() => toggleClienteAccess(cliente.id)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedClientes.includes(cliente.id)}
-                    onChange={() => toggleClienteAccess(cliente.id)}
-                    className="h-4 w-4"
-                    data-testid={`checkbox-cliente-${cliente.id}`}
-                  />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{cliente.nome}</p>
-                    <p className="text-xs text-muted-foreground">{cliente.email}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-2">
+              <Label htmlFor="search-cliente">Pesquisar Cliente</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search-cliente"
+                  placeholder="Digite o nome ou e-mail..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                  data-testid="input-search-cliente"
+                />
+              </div>
             </div>
+
+            {searchTerm && filteredClientes && filteredClientes.length > 0 && (
+              <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2">
+                {filteredClientes.map((cliente) => (
+                  <div
+                    key={cliente.id}
+                    className="flex items-center gap-3 p-3 rounded-md hover-elevate cursor-pointer"
+                    onClick={() => addClienteAccess(cliente.id)}
+                    data-testid={`search-result-cliente-${cliente.id}`}
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{cliente.nome}</p>
+                      <p className="text-xs text-muted-foreground">{cliente.email}</p>
+                    </div>
+                    <Plus className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {searchTerm && filteredClientes && filteredClientes.length === 0 && (
+              <div className="text-center py-4 text-sm text-muted-foreground border rounded-lg">
+                Nenhum cliente encontrado
+              </div>
+            )}
+
+            {selectedClientes.length > 0 && (
+              <div className="space-y-2">
+                <Label>Clientes Selecionados ({selectedClientes.length})</Label>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2">
+                  {selectedClientes.map((clienteId) => {
+                    const cliente = clientes?.find((c) => c.id === clienteId);
+                    if (!cliente) return null;
+                    return (
+                      <div
+                        key={cliente.id}
+                        className="flex items-center gap-3 p-3 rounded-md border bg-muted/50"
+                        data-testid={`selected-cliente-${cliente.id}`}
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{cliente.nome}</p>
+                          <p className="text-xs text-muted-foreground">{cliente.email}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => removeClienteAccess(cliente.id)}
+                          data-testid={`button-remove-cliente-${cliente.id}`}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {selectedClientes.length === 0 && !searchTerm && (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>Nenhum cliente selecionado</p>
+                <p className="text-xs mt-1">Use o campo acima para pesquisar e adicionar clientes</p>
+              </div>
+            )}
 
             <DialogFooter>
               <Button

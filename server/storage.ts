@@ -28,6 +28,7 @@ export interface IStorage {
   // Empresas
   getAllEmpresas(): Promise<Empresa[]>;
   getEmpresa(id: number): Promise<Empresa | undefined>;
+  getEmpresaByDominio(dominio: string): Promise<Empresa | undefined>;
   createEmpresa(empresa: InsertEmpresa): Promise<Empresa>;
   
   // Clientes
@@ -80,6 +81,11 @@ export class DatabaseStorage implements IStorage {
 
   async getEmpresa(id: number): Promise<Empresa | undefined> {
     const [empresa] = await db.select().from(empresas).where(eq(empresas.id, id));
+    return empresa || undefined;
+  }
+
+  async getEmpresaByDominio(dominio: string): Promise<Empresa | undefined> {
+    const [empresa] = await db.select().from(empresas).where(eq(empresas.dominio, dominio));
     return empresa || undefined;
   }
 
