@@ -23,14 +23,6 @@ export default function MobileClienteForm() {
   const isEditing = !!clienteId;
   const isSuperAdmin = user?.tipo === "super_admin";
 
-  const [formData, setFormData] = useState<InsertCliente>({
-    nome: "",
-    email: "",
-    telefone: "",
-    empresaId: user?.empresaId || 0,
-    ativo: true,
-  });
-
   const { data: cliente, isLoading: isLoadingCliente } = useQuery<Cliente>({
     queryKey: [`/api/clientes/${clienteId}`],
     enabled: !!clienteId,
@@ -41,12 +33,20 @@ export default function MobileClienteForm() {
     enabled: isSuperAdmin,
   });
 
+  const [formData, setFormData] = useState<InsertCliente>({
+    nome: cliente?.nome || "",
+    email: cliente?.email || "",
+    telefone: cliente?.telefone || "",
+    empresaId: cliente?.empresaId || user?.empresaId || 0,
+    ativo: cliente?.ativo ?? true,
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    if (cliente && isEditing) {
+    if (cliente) {
       setFormData({
         nome: cliente.nome,
         email: cliente.email || "",
@@ -55,7 +55,7 @@ export default function MobileClienteForm() {
         ativo: cliente.ativo,
       });
     }
-  }, [cliente, isEditing]);
+  }, [cliente]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertCliente) => {

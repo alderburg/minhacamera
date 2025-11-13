@@ -23,16 +23,6 @@ export default function MobileCameraForm() {
   const { user } = useAuth();
   const isSuperAdmin = user?.tipo === "super_admin";
 
-  const [formData, setFormData] = useState<InsertCamera>({
-    nome: "",
-    urlRtsp: "",
-    empresaId: user?.empresaId || 0,
-    ativa: true,
-    localizacao: "",
-    diasGravacao: 7,
-    resolucaoPreferida: "720p",
-  });
-
   const { data: camera, isLoading: isLoadingCamera } = useQuery<Camera>({
     queryKey: [`/api/cameras/${cameraId}`],
     enabled: !!cameraId,
@@ -43,12 +33,22 @@ export default function MobileCameraForm() {
     enabled: isSuperAdmin,
   });
 
+  const [formData, setFormData] = useState<InsertCamera>({
+    nome: camera?.nome || "",
+    urlRtsp: camera?.urlRtsp || "",
+    empresaId: camera?.empresaId || user?.empresaId || 0,
+    ativa: camera?.ativa ?? true,
+    localizacao: camera?.localizacao || "",
+    diasGravacao: camera?.diasGravacao || 7,
+    resolucaoPreferida: camera?.resolucaoPreferida || "720p",
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    if (camera && isEditing) {
+    if (camera) {
       setFormData({
         nome: camera.nome,
         urlRtsp: camera.urlRtsp,
@@ -59,7 +59,7 @@ export default function MobileCameraForm() {
         resolucaoPreferida: camera.resolucaoPreferida || "720p",
       });
     }
-  }, [camera, isEditing]);
+  }, [camera]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertCamera) => {
