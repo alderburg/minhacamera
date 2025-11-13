@@ -1014,21 +1014,21 @@ export default function CamerasManagement() {
       </AlertDialog>
 
       <Dialog open={isAccessDialogOpen} onOpenChange={setIsAccessDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Gerenciar Acessos</DialogTitle>
             <DialogDescription>
-              {selectedCamera?.nome} - Gerencie os clientes que podem visualizar esta câmera
+              {selectedCamera?.nome} - Pesquise e selecione os clientes que podem visualizar esta câmera
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleAccessSubmit} className="space-y-4 flex-1 overflow-hidden flex flex-col">
+          <form onSubmit={handleAccessSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="search-cliente">Adicionar Novo Cliente</Label>
+              <Label htmlFor="search-cliente">Pesquisar Cliente</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search-cliente"
-                  placeholder="Digite o nome ou e-mail para adicionar..."
+                  placeholder="Digite o nome ou e-mail..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -1038,11 +1038,11 @@ export default function CamerasManagement() {
             </div>
 
             {searchTerm && filteredClientes && filteredClientes.length > 0 && (
-              <div className="space-y-2 max-h-[150px] overflow-y-auto border rounded-lg p-2 bg-blue-50/50">
+              <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2">
                 {filteredClientes.map((cliente) => (
                   <div
                     key={cliente.id}
-                    className="flex items-center gap-3 p-3 rounded-md hover-elevate cursor-pointer bg-white"
+                    className="flex items-center gap-3 p-3 rounded-md hover-elevate cursor-pointer"
                     onClick={() => addClienteAccess(cliente.id)}
                     data-testid={`search-result-cliente-${cliente.id}`}
                   >
@@ -1050,137 +1050,61 @@ export default function CamerasManagement() {
                       <p className="text-sm font-medium">{cliente.nome}</p>
                       <p className="text-xs text-muted-foreground">{cliente.email}</p>
                     </div>
-                    <Plus className="h-4 w-4 text-blue-600" />
+                    <Plus className="h-4 w-4 text-muted-foreground" />
                   </div>
                 ))}
               </div>
             )}
 
             {searchTerm && filteredClientes && filteredClientes.length === 0 && (
-              <div className="text-center py-4 text-sm text-muted-foreground border rounded-lg bg-gray-50">
+              <div className="text-center py-4 text-sm text-muted-foreground border rounded-lg">
                 Nenhum cliente encontrado
               </div>
             )}
 
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-              {/* Clientes sendo adicionados (novos) */}
-              {selectedClientes.filter(id => !cameraAcessos?.find(a => a.clienteId === id)).length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-px flex-1 bg-green-200" />
-                    <Label className="text-green-700 font-semibold">
-                      Novos Acessos ({selectedClientes.filter(id => !cameraAcessos?.find(a => a.clienteId === id)).length})
-                    </Label>
-                    <div className="h-px flex-1 bg-green-200" />
-                  </div>
-                  <div className="space-y-2 border border-green-200 rounded-lg p-3 bg-green-50/30">
-                    {selectedClientes
-                      .filter(clienteId => !cameraAcessos?.find(a => a.clienteId === clienteId))
-                      .map((clienteId) => {
-                        const cliente = clientes?.find((c) => c.id === clienteId);
-                        if (!cliente) return null;
-                        return (
-                          <div
-                            key={cliente.id}
-                            className="flex items-center gap-3 p-3 rounded-md border border-green-300 bg-white"
-                            data-testid={`selected-cliente-${cliente.id}`}
-                          >
-                            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                              <Plus className="h-4 w-4 text-green-600" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{cliente.nome}</p>
-                              <p className="text-xs text-muted-foreground">{cliente.email}</p>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100"
-                              onClick={() => removeClienteAccess(cliente.id)}
-                              data-testid={`button-remove-cliente-${cliente.id}`}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                  </div>
+            {selectedClientes.length > 0 && (
+              <div className="space-y-2">
+                <Label>Clientes Selecionados ({selectedClientes.length})</Label>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2">
+                  {selectedClientes.map((clienteId) => {
+                    const cliente = clientes?.find((c) => c.id === clienteId);
+                    if (!cliente) return null;
+                    return (
+                      <div
+                        key={cliente.id}
+                        className="flex items-center gap-3 p-3 rounded-md border bg-muted/50"
+                        data-testid={`selected-cliente-${cliente.id}`}
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{cliente.nome}</p>
+                          <p className="text-xs text-muted-foreground">{cliente.email}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => removeClienteAccess(cliente.id)}
+                          data-testid={`button-remove-cliente-${cliente.id}`}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Clientes que já possuem acesso */}
-              {cameraAcessos === undefined ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-px flex-1 bg-blue-200" />
-                    <Label className="text-blue-700 font-semibold">
-                      Com Acesso Atual
-                    </Label>
-                    <div className="h-px flex-1 bg-blue-200" />
-                  </div>
-                  <div className="flex items-center justify-center py-8 border border-blue-200 rounded-lg bg-blue-50/30">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
-                      <p className="text-sm text-blue-700">Carregando acessos...</p>
-                    </div>
-                  </div>
-                </div>
-              ) : cameraAcessos && cameraAcessos.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-px flex-1 bg-blue-200" />
-                    <Label className="text-blue-700 font-semibold">
-                      Com Acesso Atual ({selectedClientes.filter(id => cameraAcessos?.find(a => a.clienteId === id)).length})
-                    </Label>
-                    <div className="h-px flex-1 bg-blue-200" />
-                  </div>
-                  <div className="space-y-2 border border-blue-200 rounded-lg p-3 bg-blue-50/30">
-                    {selectedClientes
-                      .filter(clienteId => cameraAcessos?.find(a => a.clienteId === clienteId))
-                      .map((clienteId) => {
-                        const cliente = clientes?.find((c) => c.id === clienteId);
-                        if (!cliente) return null;
-                        return (
-                          <div
-                            key={cliente.id}
-                            className="flex items-center gap-3 p-3 rounded-md border border-blue-300 bg-white"
-                            data-testid={`existing-cliente-${cliente.id}`}
-                          >
-                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                              <Users className="h-4 w-4 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{cliente.nome}</p>
-                              <p className="text-xs text-muted-foreground">{cliente.email}</p>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100"
-                              onClick={() => removeClienteAccess(cliente.id)}
-                              data-testid={`button-remove-cliente-${cliente.id}`}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
+            {selectedClientes.length === 0 && !searchTerm && (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>Nenhum cliente selecionado</p>
+                <p className="text-xs mt-1">Use o campo acima para pesquisar e adicionar clientes</p>
+              </div>
+            )}
 
-              {selectedClientes.length === 0 && !searchTerm && (
-                <div className="text-center py-12 text-sm text-muted-foreground border-2 border-dashed rounded-lg">
-                  <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="font-medium">Nenhum cliente com acesso</p>
-                  <p className="text-xs mt-1">Use o campo acima para pesquisar e adicionar clientes</p>
-                </div>
-              )}
-            </div>
-
-            <DialogFooter className="border-t pt-4 mt-4">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
