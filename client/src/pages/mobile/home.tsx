@@ -46,36 +46,36 @@ export default function MobileHome() {
       value: currentStats.totalEmpresas,
       icon: Building2,
       show: isSuperAdmin,
-      color: "from-blue-500 to-cyan-500",
+      color: "bg-blue-600",
     },
     {
       title: "Clientes",
       value: currentStats.totalClientes,
       icon: Users,
       show: isAdmin,
-      color: "from-purple-500 to-pink-500",
+      color: "bg-orange-500",
     },
     {
       title: "Câmeras",
       value: currentStats.totalCameras,
       icon: Video,
       show: true,
-      color: "from-orange-500 to-red-500",
+      color: "bg-blue-600",
     },
     {
       title: "Online",
       value: currentStats.camerasOnline,
       icon: Activity,
       show: true,
-      color: "from-green-500 to-emerald-500",
+      color: "bg-orange-500",
     },
   ].filter(card => card.show);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0 overflow-x-hidden">
       <MobileTopBar showProfile />
 
-      <div className="pt-20 px-4 md:pt-0 md:px-0">
+      <div className="pt-16 px-4 md:pt-0 md:px-0">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
             Bem-vindo! 👋
@@ -87,7 +87,7 @@ export default function MobileHome() {
           {statCards.map((card) => (
             <Card key={card.title} className="border-0 shadow-sm overflow-hidden">
               <CardContent className="p-0">
-                <div className={`bg-gradient-to-br ${card.color} p-4 text-white`}>
+                <div className={`${card.color} p-4 text-white`}>
                   <card.icon className="h-8 w-8 mb-2 opacity-90" />
                   <div className="text-3xl font-bold mb-1">{card.value}</div>
                   <div className="text-sm opacity-90">{card.title}</div>

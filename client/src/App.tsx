@@ -309,9 +309,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <AppLayout>
-            <Router />
-          </AppLayout>
+          <div className="overflow-x-hidden">
+            <AppLayout>
+              <Router />
+            </AppLayout>
+          </div>
         </AuthProvider>
         <Toaster />
       </TooltipProvider>

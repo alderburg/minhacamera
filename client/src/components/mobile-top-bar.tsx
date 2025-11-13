@@ -34,8 +34,8 @@ export function MobileTopBar({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-gradient-to-r from-pink-500 via-purple-500 to-yellow-500 z-50 md:hidden">
-      <div className="px-4 py-4">
+    <header className="fixed top-0 left-0 right-0 bg-blue-600 z-50 md:hidden">
+      <div className="px-4 py-3">
         {showProfile && !showBack && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
