@@ -107,19 +107,21 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 mb-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-xs">
-                {getInitials(user.nome)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user.nome}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          <Link href="/perfil">
+            <div className="flex items-center gap-3 mb-3 p-2 rounded-lg hover:bg-sidebar-accent cursor-pointer transition-colors">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-xs">
+                  {getInitials(user.nome)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  {user.nome}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              </div>
             </div>
-          </div>
+          </Link>
           <Button
             variant="outline"
             size="sm"
