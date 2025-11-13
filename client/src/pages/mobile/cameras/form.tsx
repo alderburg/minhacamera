@@ -15,20 +15,22 @@ import { useState, useEffect } from "react";
 import type { Camera, InsertCamera, Empresa } from "@shared/schema";
 
 export default function MobileCameraForm() {
-  const [match, params] = useRoute("/mobile/cameras/edit/:id");
+  const [matchEdit, paramsEdit] = useRoute("/mobile/cameras/edit/:id");
+  const [matchNew] = useRoute("/mobile/cameras/new");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
   
-  console.log('Route match:', match);
-  console.log('Route params:', params);
+  console.log('=== MOBILE CAMERA FORM ===');
+  console.log('Match Edit:', matchEdit, 'Params:', paramsEdit);
+  console.log('Match New:', matchNew);
   
-  const cameraId = params?.id ? parseInt(params.id) : null;
+  const cameraId = matchEdit && paramsEdit?.id ? parseInt(paramsEdit.id) : null;
   const isEditing = !!cameraId;
   const isSuperAdmin = user?.tipo === "super_admin";
   
-  console.log('Parsed cameraId:', cameraId);
-  console.log('isEditing:', isEditing);
+  console.log('Camera ID:', cameraId);
+  console.log('Is Editing:', isEditing);
 
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
