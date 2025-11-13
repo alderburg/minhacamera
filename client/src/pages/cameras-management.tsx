@@ -37,7 +37,7 @@ import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import { CameraPlayer } from "@/components/camera-player";
-import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
+import type { Camera, InsertCamera, Empresa, Cliente, CameraAcesso } from "@shared/schema";
 
 export default function CamerasManagement() {
   const { user, isLoading: authLoading } = useRequireAuth(["super_admin", "admin"]);
@@ -97,6 +97,20 @@ export default function CamerasManagement() {
   const { data: clientes } = useQuery<Cliente[]>({
     queryKey: ["/api/clientes"],
     enabled: !!user,
+  });
+
+  // Query para buscar acessos da câmera selecionada
+  const { data: cameraAcessos } = useQuery<CameraAcesso[]>({
+    queryKey: ["/api/camera-acessos", selectedCamera?.id],
+    queryFn: async () => {
+      if (!selectedCamera) return [];
+      const response = await fetch(`/api/camera-acessos/${selectedCamera.id}`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Erro ao carregar acessos");
+      return response.json();
+    },
+    enabled: !!selectedCamera && isAccessDialogOpen,
   });
 
   const createMutation = useMutation({
@@ -274,6 +288,13 @@ export default function CamerasManagement() {
     setSearchTerm("");
     setIsAccessDialogOpen(true);
   };
+
+  // Atualizar clientes selecionados quando os acessos forem carregados
+  useEffect(() => {
+    if (cameraAcessos && isAccessDialogOpen) {
+      setSelectedClientes(cameraAcessos.map(acesso => acesso.clienteId));
+    }
+  }, [cameraAcessos, isAccessDialogOpen]);
 
   const addClienteAccess = (clienteId: number) => {
     if (!selectedClientes.includes(clienteId)) {

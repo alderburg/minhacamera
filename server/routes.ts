@@ -461,6 +461,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== CAMERA ACESSOS ROUTES ====================
 
+  app.get("/api/camera-acessos/:cameraId", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
+    try {
+      const cameraId = parseInt(req.params.cameraId);
+      const user = req.user!;
+
+      // Verify camera exists and belongs to user's company (if admin)
+      const camera = await storage.getCamera(cameraId);
+      if (!camera) {
+        return res.status(404).json({ message: "Câmera não encontrada" });
+      }
+
+      if (user.tipo === "admin") {
+        if (!user.empresaId || camera.empresaId !== user.empresaId) {
+          return res.status(403).json({ message: "Sem permissão para visualizar acessos desta câmera" });
+        }
+      }
+
+      const acessos = await storage.getCameraAcessos(cameraId);
+      res.json(acessos);
+    } catch (error) {
+      console.error("Get camera acessos error:", error);
+      res.status(500).json({ message: "Erro ao buscar acessos" });
+    }
+  });
+
   app.post("/api/camera-acessos", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
     try {
       const { cameraId, clienteIds } = batchCameraAcessoSchema.parse(req.body);
