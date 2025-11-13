@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-import { authenticateToken, requireRole, type AuthRequest } from "./middleware";
+import { authenticateToken, requireRole, requireAuth, isAdmin, isSuperAdmin, type AuthRequest } from "./middleware";
 import {
   loginSchema,
   insertEmpresaSchema,
@@ -21,8 +21,6 @@ import { db } from "./db";
 import { users, empresas, clientes, cameras, cameraAcessos } from "@shared/schema";
 import { eq, and, or } from "drizzle-orm";
 import { hash, compare } from "bcryptjs";
-import { setupAuth } from "./middleware";
-import { isAdmin, isSuperAdmin, requireAuth } from "./middleware";
 import { checkCameraHealth } from "./camera-health";
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from "./notifications";
 

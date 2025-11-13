@@ -37,3 +37,15 @@ export function requireRole(...allowedRoles: string[]) {
     next();
   };
 }
+
+// Alias for authenticateToken
+export const requireAuth = authenticateToken;
+
+// Helper functions for role checking
+export function isAdmin(user: User | undefined): boolean {
+  return user?.tipo === "admin" || user?.tipo === "super_admin";
+}
+
+export function isSuperAdmin(user: User | undefined): boolean {
+  return user?.tipo === "super_admin";
+}
