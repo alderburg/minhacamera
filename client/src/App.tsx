@@ -339,7 +339,7 @@ function App() {
 }
 
 function WebSocketProvider() {
-  useWebSocket(); // Initialize WebSocket connection
+  useWebSocket();
   return null;
 }
 

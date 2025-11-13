@@ -4,6 +4,9 @@ import { setupVite, serveStatic, log } from "./vite";
 import { startCameraMonitoring, onCameraStatusChange } from "./camera-monitor";
 import { createNotification } from "./notifications";
 import { setupWebSocket, broadcastCameraStatusChange, broadcastNotification } from "./websocket";
+import { db } from "./db";
+import { cameras } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const app = express();
 
@@ -84,37 +87,64 @@ app.use((req, res, next) => {
     // Setup WebSocket
     setupWebSocket(server);
 
-    // Start camera monitoring
-    startCameraMonitoring(30000); // Check every 30 seconds
+    // Start camera monitoring - check every 30 seconds
+    startCameraMonitoring(30000);
 
-    // Listen for camera status changes
+    // Listen for camera status changes and create notifications
     onCameraStatusChange(async (change) => {
-      // Broadcast status change via WebSocket
-      broadcastCameraStatusChange({
-        cameraId: change.cameraId,
-        cameraNome: change.cameraNome,
-        isOnline: change.isOnline,
-        timestamp: change.timestamp,
-      });
+      try {
+        // Broadcast status change via WebSocket
+        broadcastCameraStatusChange({
+          cameraId: change.cameraId,
+          cameraNome: change.cameraNome,
+          isOnline: change.isOnline,
+          timestamp: change.timestamp,
+        });
 
-      if (!change.isOnline && change.wasOnline) {
-        // Camera went offline
-        const notification = await createNotification(
-          'Câmera Offline',
-          `A câmera "${change.cameraNome}" está offline.`,
-          'error'
-        );
-        broadcastNotification(notification);
-        log(`Camera ${change.cameraNome} went OFFLINE`);
-      } else if (change.isOnline && !change.wasOnline) {
-        // Camera came back online
-        const notification = await createNotification(
-          'Câmera Online',
-          `A câmera "${change.cameraNome}" voltou a ficar online.`,
-          'success'
-        );
-        broadcastNotification(notification);
-        log(`Camera ${change.cameraNome} is back ONLINE`);
+        // Get camera details to associate notification with company
+        const cameraResults = await db.select().from(cameras).where(eq(cameras.id, change.cameraId)).limit(1);
+        
+        // If camera was deleted during monitoring, skip notification creation
+        if (!cameraResults || cameraResults.length === 0) {
+          console.warn(`Camera ${change.cameraId} not found - skipping notification creation`);
+          return;
+        }
+
+        const empresaId = cameraResults[0].empresaId;
+
+        if (!change.isOnline && change.wasOnline) {
+          // Camera went offline - create notification
+          try {
+            const notification = await createNotification(
+              'Câmera Offline',
+              `A câmera "${change.cameraNome}" está offline.`,
+              'error',
+              undefined,
+              empresaId
+            );
+            broadcastNotification(notification);
+            log(`📹 Camera ${change.cameraNome} went OFFLINE`);
+          } catch (error) {
+            console.error('Error creating offline notification:', error);
+          }
+        } else if (change.isOnline && !change.wasOnline) {
+          // Camera came back online - create notification
+          try {
+            const notification = await createNotification(
+              'Câmera Online',
+              `A câmera "${change.cameraNome}" voltou a ficar online.`,
+              'success',
+              undefined,
+              empresaId
+            );
+            broadcastNotification(notification);
+            log(`📹 Camera ${change.cameraNome} is back ONLINE`);
+          } catch (error) {
+            console.error('Error creating online notification:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error handling camera status change:', error);
       }
     });
   });
