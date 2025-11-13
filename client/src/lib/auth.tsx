@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import type { User } from "@shared/schema";
@@ -70,10 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLocation("/login");
   };
 
-  // Check auth only once when component mounts
   useEffect(() => {
     checkAuth();
-  }, []); // Empty dependency array - runs only once
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, login, logout, checkAuth }}>

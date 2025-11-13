@@ -69,6 +69,7 @@ function PublicRoute({ component: Component, ...rest }: any) {
   }
 
   if (user) {
+    // Always redirect to dashboard
     return <Redirect to="/dashboard" />;
   }
 
@@ -217,6 +218,7 @@ function Router() {
             return <Redirect to="/login" />;
           }
 
+          // Always redirect to dashboard
           return <Redirect to="/dashboard" />;
         }}
       </Route>
