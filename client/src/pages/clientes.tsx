@@ -118,7 +118,7 @@ export default function Clientes() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (isSuperAdmin && !formData.empresaId) {
       toast({
         variant: "destructive",
@@ -127,20 +127,20 @@ export default function Clientes() {
       });
       return;
     }
-    
+
     createMutation.mutate(formData);
   };
 
   const handleEdit = (cliente: Cliente) => {
     setEditingCliente(cliente);
-    
+
     // Buscar e definir a empresa selecionada
     const empresa = empresas?.find(e => e.id === cliente.empresaId);
     if (empresa) {
       setSelectedEmpresa(empresa);
       setEmpresaSearchTerm(empresa.nome);
     }
-    
+
     setFormData({
       nome: cliente.nome,
       email: cliente.email,
@@ -223,10 +223,10 @@ export default function Clientes() {
   const filteredClientes = clientes?.filter((cliente) => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
-    
+
     // Buscar o nome da empresa
     const empresaNome = empresas?.find(e => e.id === cliente.empresaId)?.nome?.toLowerCase() || '';
-    
+
     return (
       cliente.nome.toLowerCase().includes(search) ||
       cliente.email.toLowerCase().includes(search) ||
@@ -252,7 +252,7 @@ export default function Clientes() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Clientes</h1>
@@ -380,7 +380,7 @@ export default function Clientes() {
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            
+
             <span className="text-sm text-muted-foreground min-w-[60px] text-center">
               {currentPage} / {totalPages}
             </span>
@@ -409,7 +409,7 @@ export default function Clientes() {
             {isSuperAdmin && (
               <div className="space-y-2">
                 <Label htmlFor="empresa">Empresa *</Label>
-                
+
                 {selectedEmpresa ? (
                   <div className="flex items-center gap-2 p-3 rounded-md border bg-muted">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -438,7 +438,7 @@ export default function Clientes() {
                       onChange={(e) => setEmpresaSearchTerm(e.target.value)}
                       data-testid="input-empresa-search"
                     />
-                    
+
                     {empresaSearchTerm && filteredEmpresas && filteredEmpresas.length > 0 && (
                       <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2">
                         {filteredEmpresas.map((empresa) => (

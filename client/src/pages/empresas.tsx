@@ -157,7 +157,7 @@ export default function Empresas() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!editingEmpresa && subdomainStatus.available === false) {
       toast({
         variant: "destructive",
@@ -166,7 +166,7 @@ export default function Empresas() {
       });
       return;
     }
-    
+
     createMutation.mutate(formData);
   };
 
@@ -247,7 +247,7 @@ export default function Empresas() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Empresas</h1>
@@ -368,7 +368,7 @@ export default function Empresas() {
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            
+
             <span className="text-sm text-muted-foreground min-w-[60px] text-center">
               {currentPage} / {totalPages}
             </span>

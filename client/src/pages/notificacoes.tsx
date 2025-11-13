@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,7 +46,7 @@ export default function Notificacoes() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Notificações</h1>

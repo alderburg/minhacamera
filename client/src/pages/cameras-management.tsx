@@ -158,14 +158,14 @@ export default function CamerasManagement() {
 
   const handleEdit = (camera: Camera) => {
     setEditingCamera(camera);
-    
+
     // Buscar e definir a empresa selecionada
     const empresa = empresas?.find(e => e.id === camera.empresaId);
     if (empresa) {
       setSelectedEmpresa(empresa);
       setEmpresaSearchTerm(empresa.nome);
     }
-    
+
     setFormData({
       nome: camera.nome,
       urlRtsp: camera.urlRtsp,
@@ -326,8 +326,8 @@ export default function CamerasManagement() {
           </Button>
         </div>
         <div className="flex-1 p-6">
-          <CameraPlayer 
-            cameraId={fullscreenCamera.id} 
+          <CameraPlayer
+            cameraId={fullscreenCamera.id}
             className="h-full w-full rounded-lg border overflow-hidden"
           />
         </div>
@@ -336,7 +336,7 @@ export default function CamerasManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-2">Câmeras</h1>
@@ -363,9 +363,9 @@ export default function CamerasManagement() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {currentCameras.map((camera) => (
-          <Card 
-            key={camera.id} 
-            className="hover-elevate cursor-pointer" 
+          <Card
+            key={camera.id}
+            className="hover-elevate cursor-pointer"
             data-testid={`camera-card-${camera.id}`}
             onClick={() => setFullscreenCamera(camera)}
           >
@@ -495,7 +495,7 @@ export default function CamerasManagement() {
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            
+
             <span className="text-sm text-muted-foreground min-w-[60px] text-center">
               {currentPage} / {totalPages}
             </span>
@@ -524,7 +524,7 @@ export default function CamerasManagement() {
             {isSuperAdmin && (
               <div className="space-y-2">
                 <Label htmlFor="empresa">Empresa *</Label>
-                
+
                 {selectedEmpresa ? (
                   <div className="flex items-center gap-2 p-3 rounded-md border bg-muted">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -553,7 +553,7 @@ export default function CamerasManagement() {
                       onChange={(e) => setEmpresaSearchTerm(e.target.value)}
                       data-testid="input-empresa-search"
                     />
-                    
+
                     {empresaSearchTerm && filteredEmpresas && filteredEmpresas.length > 0 && (
                       <div className="space-y-2 max-h-[200px] overflow-y-auto border rounded-lg p-2">
                         {filteredEmpresas.map((empresa) => (
