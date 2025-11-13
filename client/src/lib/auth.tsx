@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import type { User } from "@shared/schema";
@@ -16,12 +17,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [, setLocation] = useLocation();
-  const [isChecking, setIsChecking] = useState(false);
 
   const checkAuth = async () => {
-    if (isChecking) return;
-    
-    setIsChecking(true);
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include",
@@ -37,7 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     } finally {
       setIsLoading(false);
-      setIsChecking(false);
     }
   };
 
@@ -74,9 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLocation("/login");
   };
 
+  // Check auth only once when component mounts
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, []); // Empty dependency array - runs only once
 
   return (
     <AuthContext.Provider value={{ user, isLoading, login, logout, checkAuth }}>
