@@ -444,10 +444,15 @@ export default function CamerasManagement() {
             key={camera.id}
             className="hover-elevate cursor-pointer"
             data-testid={`camera-card-${camera.id}`}
-            onClick={() => setFullscreenCamera(camera)}
+            onClick={(e) => {
+              // Apenas abrir fullscreen se clicar no card, não nos botões
+              if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.card-clickable-area')) {
+                setFullscreenCamera(camera);
+              }
+            }}
           >
             <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-4 card-clickable-area">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                   <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
                     <Video className="h-5 w-5 text-muted-foreground" />
@@ -459,7 +464,7 @@ export default function CamerasManagement() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 card-clickable-area">
                 {camera.localizacao && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <MapPin className="h-3 w-3" />
@@ -510,12 +515,14 @@ export default function CamerasManagement() {
                     <Video className="h-4 w-4" />
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      e.nativeEvent.stopImmediatePropagation();
                       handleEdit(camera);
                     }}
                     data-testid={`button-edit-camera-${camera.id}`}
