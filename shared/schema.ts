@@ -34,15 +34,38 @@ export const clientes = pgTable("clientes", {
   ativo: boolean("ativo").notNull().default(true),
 });
 
-// Cameras table - IP cameras with RTSP streaming
+// Cameras table - IP cameras with multiple protocol support
 export const cameras = pgTable("cameras", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   nome: text("nome").notNull(),
-  urlRtsp: text("url_rtsp").notNull(),
+  protocolo: text("protocolo").notNull().default("RTSP"), // 'RTSP' | 'ONVIF' | 'P2P' | 'HTTP' | 'RTMP' | 'HLS'
+  
+  // URL/Conexão - campos genéricos que servem para todos os protocolos
+  urlConexao: text("url_conexao"), // URL principal (RTSP, HTTP, HLS, etc)
+  usuario: text("usuario"), // Usuário para autenticação
+  senhaCam: text("senha_cam"), // Senha da câmera
+  
+  // Campos específicos para cada protocolo
+  ip: text("ip"), // IP da câmera (ONVIF, P2P)
+  porta: integer("porta"), // Porta de conexão
+  canalRtsp: text("canal_rtsp"), // Canal RTSP (ex: /stream1, /Streaming/Channels/101)
+  
+  // ONVIF específico
+  onvifPort: integer("onvif_port"), // Porta ONVIF (geralmente 80 ou 8000)
+  profileToken: text("profile_token"), // Token do perfil ONVIF
+  
+  // P2P específico
+  p2pId: text("p2p_id"), // ID único do dispositivo P2P
+  p2pPassword: text("p2p_password"), // Senha P2P
+  
+  // HTTP/RTMP/HLS específico
+  streamPath: text("stream_path"), // Caminho do stream (para HTTP/HLS)
+  
   empresaId: integer("empresa_id").notNull().references(() => empresas.id),
   localizacao: text("localizacao"),
   ativa: boolean("ativa").notNull().default(true),
-  // Future expansion fields
+  
+  // Configurações
   diasGravacao: integer("dias_gravacao").default(7),
   resolucaoPreferida: text("resolucao_preferida").default("720p"),
 });
@@ -148,9 +171,21 @@ export const selectClienteSchema = createSelectSchema(clientes);
 // Camera schemas
 export const insertCameraSchema = createInsertSchema(cameras, {
   nome: z.string().min(1, "Nome da câmera é obrigatório"),
-  urlRtsp: z.string().min(1, "URL RTSP é obrigatória"),
+  protocolo: z.enum(["RTSP", "ONVIF", "P2P", "HTTP", "RTMP", "HLS"]),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
   ativa: z.boolean().optional(),
+  // Campos opcionais dependendo do protocolo
+  urlConexao: z.string().optional(),
+  usuario: z.string().optional(),
+  senhaCam: z.string().optional(),
+  ip: z.string().optional(),
+  porta: z.number().int().optional(),
+  canalRtsp: z.string().optional(),
+  onvifPort: z.number().int().optional(),
+  profileToken: z.string().optional(),
+  p2pId: z.string().optional(),
+  p2pPassword: z.string().optional(),
+  streamPath: z.string().optional(),
 }).omit({
   id: true,
 });
