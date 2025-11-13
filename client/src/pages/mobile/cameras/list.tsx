@@ -116,12 +116,9 @@ export default function MobileCamerasList() {
                       <h3 className="font-semibold text-gray-900 truncate">{camera.nome}</h3>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <Link href={`/mobile/cameras/edit/${camera.id}`}>
-                          <a 
-                            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors block"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                          <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
                             <Pencil className="h-4 w-4 text-blue-600" />
-                          </a>
+                          </button>
                         </Link>
                         <button
                           onClick={(e) => handleDelete(e, camera.id, camera.nome)}
