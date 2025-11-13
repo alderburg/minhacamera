@@ -74,7 +74,7 @@ export default function CamerasView() {
   }
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
+    <div className="p-2 md:p-2 space-y-2">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-2">

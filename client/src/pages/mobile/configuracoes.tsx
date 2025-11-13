@@ -23,7 +23,7 @@ export default function MobileConfiguracoes() {
         }
       />
 
-      <div className="pt-20 px-0 md:px-4">
+      <div className="pt-24 pb-8 px-0 md:px-4">
         <div className="space-y-6 px-4">
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">

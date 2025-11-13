@@ -97,7 +97,7 @@ export default function MobileMenu() {
       />
 
       {/* Profile Section */}
-      <div className="bg-white border-b p-6 pt-20">
+      <div className="bg-white border-b p-6 pt-24">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 border-2 border-blue-300">
             <AvatarFallback className="bg-blue-600 text-white text-xl font-bold">
@@ -116,7 +116,7 @@ export default function MobileMenu() {
         </div>
       </div>
 
-      <div className="space-y-3 px-4">
+      <div className="space-y-3 px-4 pb-6">
         {menuItems.map((item) => (
           <Link key={item.href} href={item.href}>
             <button className="w-full bg-white rounded-xl p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors border border-gray-100">

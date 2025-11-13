@@ -75,7 +75,7 @@ export default function MobileHome() {
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0 overflow-x-hidden">
       <MobileTopBar showProfile />
 
-      <div className="pt-16 px-0 md:px-0">
+      <div className="pt-20 pb-6 px-0 md:px-0">
         <div className="mb-6 px-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
             Bem-vindo! 👋
