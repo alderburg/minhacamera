@@ -96,7 +96,7 @@ export default function MobileMenu() {
         }
       />
 
-      <div className="pt-16 md:pt-0 md:px-4">
+      <div className="pt-16 px-0 md:px-4">
         <div className="bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100 mx-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16 border-2 border-blue-300">

@@ -130,7 +130,8 @@ export default function MobileClienteForm() {
         subtitle={isEditing ? "Atualize os dados do cliente" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="pt-20 px-4 pb-6 md:px-4 md:pt-0">
+      <form onSubmit={handleSubmit} className="pt-20 px-0 pb-6 md:px-4 md:pt-0">
+        <div className="px-4">
         <div className="space-y-4">
           <div className="bg-white rounded-xl p-4 border border-gray-100">
             <Label htmlFor="nome" className="text-gray-700 font-semibold mb-2 block">
@@ -215,7 +216,8 @@ export default function MobileClienteForm() {
           </div>
         </div>
 
-        <div className="mt-6 space-y-3">
+        </div>
+        <div className="mt-6 space-y-3 px-4">
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white h-12 text-base font-semibold"

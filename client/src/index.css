@@ -184,6 +184,19 @@
     width: 100%;
     overflow-x: hidden;
   }
+
+  /* Remove padding lateral em mobile */
+  @media (max-width: 767px) {
+    .mobile-full-width {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    
+    .mobile-full-width > * {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
 }
 
 /**
