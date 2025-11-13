@@ -147,7 +147,6 @@ export const insertUserSchema = createInsertSchema(users, {
   email: z.string().email("Email inválido"),
   senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
   tipo: z.enum(["super_admin", "admin", "user"]),
-  ativo: z.boolean().optional(),
 }).omit({
   id: true,
 });
@@ -162,7 +161,6 @@ export const loginSchema = z.object({
 // Empresa schemas
 export const insertEmpresaSchema = createInsertSchema(empresas, {
   nome: z.string().min(1, "Nome da empresa é obrigatório"),
-  ativo: z.boolean().optional(),
 }).omit({
   id: true,
 });
@@ -174,7 +172,6 @@ export const insertClienteSchema = createInsertSchema(clientes, {
   nome: z.string().min(1, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
-  ativo: z.boolean().optional(),
 }).omit({
   id: true,
 });
@@ -186,8 +183,6 @@ export const insertCameraSchema = createInsertSchema(cameras, {
   nome: z.string().min(1, "Nome da câmera é obrigatório"),
   protocolo: z.enum(["RTSP", "ONVIF", "P2P", "HTTP", "RTMP", "HLS"]),
   empresaId: z.number().int().positive("Empresa ID é obrigatório"),
-  ativa: z.boolean().optional(),
-  status: z.enum(["online", "offline", "error", "disabled"]).optional().default("offline"),
   // Campos opcionais dependendo do protocolo
   urlConexao: z.string().optional(),
   usuario: z.string().optional(),
@@ -244,7 +239,6 @@ export const insertNotificationSchema = createInsertSchema(notifications, {
   title: z.string().min(1, "Título é obrigatório"),
   message: z.string().min(1, "Mensagem é obrigatória"),
   type: z.enum(["success", "warning", "error", "info"]),
-  read: z.boolean().optional(),
   userId: z.number().int().optional(),
   empresaId: z.number().int().optional(),
 }).omit({

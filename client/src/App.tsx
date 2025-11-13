@@ -320,30 +320,27 @@ function Router() {
   );
 }
 
-function AppContent() {
-  useWebSocket(); // Initialize WebSocket connection
-
-  return (
-    <>
-      <RouterProvider router={router} />
-      <Toaster />
-    </>
-  );
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="overflow-x-hidden">
-          <AppLayout>
-            <Router />
-          </AppLayout>
-        </div>
+        <TooltipProvider>
+          <WebSocketProvider />
+          <div className="overflow-x-hidden">
+            <AppLayout>
+              <Router />
+            </AppLayout>
+          </div>
+          <Toaster />
+        </TooltipProvider>
       </AuthProvider>
-      <Toaster />
     </QueryClientProvider>
   );
+}
+
+function WebSocketProvider() {
+  useWebSocket(); // Initialize WebSocket connection
+  return null;
 }
 
 export default App;

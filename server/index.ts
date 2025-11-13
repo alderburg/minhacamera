@@ -88,7 +88,7 @@ app.use((req, res, next) => {
     startCameraMonitoring(30000); // Check every 30 seconds
 
     // Listen for camera status changes
-    onCameraStatusChange((change) => {
+    onCameraStatusChange(async (change) => {
       // Broadcast status change via WebSocket
       broadcastCameraStatusChange({
         cameraId: change.cameraId,
@@ -99,7 +99,7 @@ app.use((req, res, next) => {
 
       if (!change.isOnline && change.wasOnline) {
         // Camera went offline
-        const notification = createNotification(
+        const notification = await createNotification(
           'Câmera Offline',
           `A câmera "${change.cameraNome}" está offline.`,
           'error'
@@ -108,7 +108,7 @@ app.use((req, res, next) => {
         log(`Camera ${change.cameraNome} went OFFLINE`);
       } else if (change.isOnline && !change.wasOnline) {
         // Camera came back online
-        const notification = createNotification(
+        const notification = await createNotification(
           'Câmera Online',
           `A câmera "${change.cameraNome}" voltou a ficar online.`,
           'success'

@@ -1,4 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws';
+import type { Server } from 'http';
 import type { Notification } from '@shared/schema';
 
 const clients = new Set<WebSocket>();
