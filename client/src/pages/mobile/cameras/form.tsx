@@ -19,11 +19,6 @@ export default function MobileCameraForm() {
   const cameraId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!cameraId;
   const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const { toast } = useToast();
   const { user } = useAuth();
   const isSuperAdmin = user?.tipo === "super_admin";
@@ -38,7 +33,7 @@ export default function MobileCameraForm() {
     resolucaoPreferida: "720p",
   });
 
-  const { data: camera } = useQuery<Camera>({
+  const { data: camera, isLoading: isLoadingCamera } = useQuery<Camera>({
     queryKey: [`/api/cameras/${cameraId}`],
     enabled: !!cameraId,
   });
@@ -49,7 +44,11 @@ export default function MobileCameraForm() {
   });
 
   useEffect(() => {
-    if (camera) {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    if (camera && isEditing) {
       setFormData({
         nome: camera.nome,
         urlRtsp: camera.urlRtsp,
@@ -60,7 +59,7 @@ export default function MobileCameraForm() {
         resolucaoPreferida: camera.resolucaoPreferida || "720p",
       });
     }
-  }, [camera]);
+  }, [camera, isEditing]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertCamera) => {

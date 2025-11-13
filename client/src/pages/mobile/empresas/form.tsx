@@ -19,10 +19,6 @@ export default function MobileEmpresaForm() {
   const empresaId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!empresaId;
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const [formData, setFormData] = useState<InsertEmpresa>({
     nome: "",
     logo: "",
@@ -30,13 +26,17 @@ export default function MobileEmpresaForm() {
     ativo: true,
   });
 
-  const { data: empresa } = useQuery<Empresa>({
+  const { data: empresa, isLoading: isLoadingEmpresa } = useQuery<Empresa>({
     queryKey: [`/api/empresas/${empresaId}`],
     enabled: !!empresaId,
   });
 
   useEffect(() => {
-    if (empresa) {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    if (empresa && isEditing) {
       setFormData({
         nome: empresa.nome,
         logo: empresa.logo || "",
@@ -44,7 +44,7 @@ export default function MobileEmpresaForm() {
         ativo: empresa.ativo,
       });
     }
-  }, [empresa]);
+  }, [empresa, isEditing]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: InsertEmpresa) => {
