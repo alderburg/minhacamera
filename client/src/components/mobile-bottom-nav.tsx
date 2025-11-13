@@ -45,7 +45,7 @@ export function MobileBottomNav() {
               <button
                 className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[60px] ${
                   isActive
-                    ? "text-blue-600"
+                    ? "text-pink-600"
                     : "text-gray-500"
                 }`}
               >

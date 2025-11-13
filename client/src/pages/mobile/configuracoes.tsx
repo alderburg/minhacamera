@@ -23,8 +23,8 @@ export default function MobileConfiguracoes() {
         }
       />
 
-      <div className="pt-20 md:pt-0 md:px-0">
-        <div className="space-y-6 px-4">
+      <div className="pt-20 px-4 md:pt-0 md:px-0">
+        <div className="space-y-6">
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">
               Aparência

@@ -1,13 +1,11 @@
 import { MobileTopBar } from "@/components/mobile-top-bar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, Search, Building2, CheckCircle2, XCircle, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Building2, CheckCircle2, XCircle, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Empresa } from "@shared/schema";
 
 export default function MobileEmpresasList() {
@@ -26,35 +24,6 @@ export default function MobileEmpresasList() {
     empresa.dominio?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const { toast } = useToast();
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return await apiRequest("DELETE", `/api/empresas/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
-      toast({
-        title: "Empresa excluída",
-        description: "A empresa foi excluída com sucesso",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao excluir empresa",
-        description: error.message,
-      });
-    },
-  });
-
-  const handleDelete = (e: React.MouseEvent, id: number) => {
-    e.preventDefault();
-    if (window.confirm("Tem certeza que deseja excluir esta empresa?")) {
-      deleteMutation.mutate(id);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar 
@@ -71,8 +40,8 @@ export default function MobileEmpresasList() {
         }
       />
 
-      <div className="pt-20 md:pt-0 md:px-0">
-        <div className="mb-4 px-4">
+      <div className="pt-20 px-4 md:pt-0 md:px-0">
+        <div className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
@@ -105,30 +74,19 @@ export default function MobileEmpresasList() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3 px-4">
+          <div className="space-y-3">
             {filteredEmpresas.map((empresa) => (
-              <div key={empresa.id} className="bg-white rounded-xl p-4 border border-gray-100 hover:bg-gray-50 transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 truncate">{empresa.nome}</h3>
-                      <div className="flex items-center gap-2">
-                        <Link href={`/mobile/empresas/edit/${empresa.id}`}>
-                          <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-                            <Pencil className="h-4 w-4 text-gray-600" />
-                          </button>
-                        </Link>
-                        <button 
-                          onClick={(e) => handleDelete(e, empresa.id)}
-                          className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </button>
-                      </div>
+              <Link key={empresa.id} href={`/mobile/empresas/edit/${empresa.id}`}>
+                <div className="bg-white rounded-xl p-4 border border-gray-100 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                      <Building2 className="h-6 w-6 text-white" />
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-900 truncate">{empresa.nome}</h3>
+                        <Pencil className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      </div>
                       {empresa.dominio && (
                         <p className="text-sm text-gray-500 truncate mb-2">
                           {empresa.dominio}
@@ -150,7 +108,7 @@ export default function MobileEmpresasList() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

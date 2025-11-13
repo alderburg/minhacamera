@@ -123,15 +123,15 @@ export default function MobileClienteForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
-      <MobileTopBar
-        showBack
+      <MobileTopBar 
+        showBack 
         backUrl="/mobile/clientes"
         title={isEditing ? "Editar Cliente" : "Novo Cliente"}
         subtitle={isEditing ? "Atualize os dados do cliente" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="pt-20 pb-6">
-        <div className="space-y-4 px-4">
+      <form onSubmit={handleSubmit} className="pt-20 px-4 pb-6">
+        <div className="space-y-4">
           <div className="bg-white rounded-xl p-4 border border-gray-100">
             <Label htmlFor="nome" className="text-gray-700 font-semibold mb-2 block">
               Nome Completo <span className="text-red-500">*</span>
@@ -215,10 +215,10 @@ export default function MobileClienteForm() {
           </div>
         </div>
 
-        <div className="mt-6 px-4">
+        <div className="mt-6 space-y-3">
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-semibold"
+            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white h-12 text-base font-semibold"
             disabled={saveMutation.isPending}
           >
             {saveMutation.isPending ? (
@@ -233,6 +233,28 @@ export default function MobileClienteForm() {
               </>
             )}
           </Button>
+
+          {isEditing && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-red-200 text-red-600 hover:bg-red-50 h-12 text-base font-semibold"
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-5 w-5 mr-2" />
+                  Excluir Cliente
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </form>
 

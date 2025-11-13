@@ -177,7 +177,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
               <NotificationBell />
             </div>
           </header>
-          <main className="flex-1 overflow-auto md:p-8">
+          <main className="flex-1 overflow-auto p-6 md:p-8">
             {children}
           </main>
         </div>
@@ -292,10 +292,7 @@ function Router() {
       </Route>
 
       <Route path="/perfil">
-        {() => {
-          const isMobile = window.innerWidth < 768;
-          return <ProtectedRoute component={isMobile ? require("@/pages/mobile/perfil").default : Perfil} />;
-        }}
+        <ProtectedRoute component={Perfil} />
       </Route>
 
       <Route path="/notificacoes">
