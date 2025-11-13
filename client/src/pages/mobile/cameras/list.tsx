@@ -140,15 +140,6 @@ export default function MobileCamerasList() {
                     <Badge variant="outline" className="text-xs">
                       {camera.diasGravacao || 7} dias
                     </Badge>
-                    {camera.ativa ? (
-                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 text-xs">
-                        Ativa
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        Inativa
-                      </Badge>
-                    )}
                   </div>
                 </div>
               </div>
