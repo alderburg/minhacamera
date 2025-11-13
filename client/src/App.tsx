@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect, useLocation } from "wouter";
+import { Switch, Route, Redirect, useLocation, Link } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -27,6 +27,7 @@ import MobileCamerasList from "@/pages/mobile/cameras/list";
 import MobileCameraForm from "@/pages/mobile/cameras/form";
 import MobileNotificacoes from "@/pages/mobile/notificacoes";
 import MobileConfiguracoes from "@/pages/mobile/configuracoes";
+import MobilePerfil from "@/pages/mobile/perfil";
 import { Loader2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -145,12 +146,11 @@ function NotificationBell() {
               ))
             )}
           </div>
-          <a
-            href="/notificacoes"
-            className="block text-center text-sm text-primary hover:underline"
-          >
-            Ver todas as notificações
-          </a>
+          <Link href="/notificacoes">
+            <span className="block text-center text-sm text-primary hover:underline cursor-pointer">
+              Ver todas as notificações
+            </span>
+          </Link>
         </div>
       </PopoverContent>
     </Popover>
@@ -269,6 +269,10 @@ function Router() {
 
       <Route path="/mobile/configuracoes">
         <ProtectedRoute component={MobileConfiguracoes} />
+      </Route>
+
+      <Route path="/mobile/perfil">
+        <ProtectedRoute component={MobilePerfil} />
       </Route>
 
       {/* Dashboard - renders mobile or desktop version based on screen size */}

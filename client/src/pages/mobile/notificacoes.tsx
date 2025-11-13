@@ -23,7 +23,7 @@ export default function MobileNotificacoes() {
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       <MobileTopBar 
         showBack 
-        backUrl="/dashboard"
+        backUrl="/mobile/menu"
         title="Notificações"
         subtitle="Alertas e avisos do sistema"
       />

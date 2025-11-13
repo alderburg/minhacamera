@@ -69,7 +69,7 @@ export default function MobileClientesList() {
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0 overflow-x-hidden">
       <MobileTopBar 
         showBack 
-        backUrl="/dashboard"
+        backUrl="/mobile/menu"
         title="Clientes"
         subtitle={`${filteredClientes.length} clientes cadastrados`}
         icon={Users}

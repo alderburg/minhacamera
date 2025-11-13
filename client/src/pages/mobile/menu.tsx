@@ -42,7 +42,7 @@ export default function MobileMenu() {
       title: "Dados da Conta",
       description: "Gerencie suas informações pessoais",
       icon: User,
-      href: "/perfil",
+      href: "/mobile/perfil",
       show: true,
     },
     {

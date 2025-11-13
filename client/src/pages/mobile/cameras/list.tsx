@@ -60,7 +60,7 @@ export default function MobileCamerasList() {
     <div className="min-h-screen bg-gray-50 pb-16 md:pb-0 overflow-x-hidden">
       <MobileTopBar
         showBack
-        backUrl="/dashboard"
+        backUrl="/mobile/menu"
         title="Câmeras"
         subtitle={`${filteredCameras.length} câmeras cadastradas`}
         icon={Video}
