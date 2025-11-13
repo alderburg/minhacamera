@@ -3,6 +3,23 @@ import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
+import { exec } from 'child_process';
+
+// Configura o path do FFmpeg
+const setFfmpegPath = async () => {
+  try {
+    const { stdout } = await promisify(exec)('which ffmpeg');
+    const ffmpegPath = stdout.trim();
+    if (ffmpegPath) {
+      ffmpeg.setFfmpegPath(ffmpegPath);
+      console.log('FFmpeg encontrado em:', ffmpegPath);
+    }
+  } catch (error) {
+    console.error('FFmpeg não encontrado no sistema');
+  }
+};
+
+setFfmpegPath();
 
 const mkdir = promisify(fs.mkdir);
 const rm = promisify(fs.rm);
