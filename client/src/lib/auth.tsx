@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // Important: send cookies
+      credentials: "include",
       body: JSON.stringify({ email, senha }),
     });
 
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     await fetch("/api/auth/logout", {
       method: "POST",
-      credentials: "include", // Important: send cookies
+      credentials: "include",
     });
     setUser(null);
     setLocation("/login");
