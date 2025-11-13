@@ -36,6 +36,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useWebSocket } from "@/hooks/use-websocket";
 
 function ProtectedRoute({ component: Component, ...rest }: any) {
   const { user, isLoading } = useAuth();
@@ -190,7 +192,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 function Router() {
   // Reset scroll to top on route change
   const [location] = useLocation();
-  
+  const isMobile = useIsMobile();
+  useWebSocket(); // Initialize WebSocket connection
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
@@ -201,7 +205,7 @@ function Router() {
       <Route path="/">
         {() => {
           const { user, isLoading } = useAuth();
-          
+
           if (isLoading) {
             return (
               <div className="flex items-center justify-center min-h-screen">
@@ -209,11 +213,11 @@ function Router() {
               </div>
             );
           }
-          
+
           if (!user) {
             return <Redirect to="/login" />;
           }
-          
+
           // Always redirect to dashboard
           return <Redirect to="/dashboard" />;
         }}

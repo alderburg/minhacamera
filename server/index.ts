@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { startCameraMonitoring, onCameraStatusChange } from "./camera-monitor";
 import { createNotification } from "./notifications";
+import { setupWebSocket, broadcastCameraStatusChange, broadcastNotification } from "./websocket";
 
 const app = express();
 
@@ -80,26 +81,39 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
     
+    // Setup WebSocket
+    setupWebSocket(server);
+    
     // Start camera monitoring
     startCameraMonitoring(30000); // Check every 30 seconds
     
     // Listen for camera status changes
     onCameraStatusChange((change) => {
+      // Broadcast status change via WebSocket
+      broadcastCameraStatusChange({
+        cameraId: change.cameraId,
+        cameraNome: change.cameraNome,
+        isOnline: change.isOnline,
+        timestamp: change.timestamp,
+      });
+
       if (!change.isOnline && change.wasOnline) {
         // Camera went offline
-        createNotification(
+        const notification = createNotification(
           'Câmera Offline',
           `A câmera "${change.cameraNome}" está offline.`,
           'error'
         );
+        broadcastNotification(notification);
         log(`Camera ${change.cameraNome} went OFFLINE`);
       } else if (change.isOnline && !change.wasOnline) {
         // Camera came back online
-        createNotification(
+        const notification = createNotification(
           'Câmera Online',
           `A câmera "${change.cameraNome}" voltou a ficar online.`,
           'success'
         );
+        broadcastNotification(notification);
         log(`Camera ${change.cameraNome} is back ONLINE`);
       }
     });
