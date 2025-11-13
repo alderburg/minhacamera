@@ -136,8 +136,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clienteData = insertClienteSchema.parse(req.body);
 
       // If admin (not super_admin), force empresaId to their own company
-      if (user.tipo === "admin" && user.empresaId) {
+      if (user.tipo === "admin") {
+        if (!user.empresaId) {
+          return res.status(403).json({ message: "Admin sem empresa associada" });
+        }
         clienteData.empresaId = user.empresaId;
+      }
+
+      // Validate empresa exists
+      const empresa = await storage.getEmpresa(clienteData.empresaId);
+      if (!empresa) {
+        return res.status(404).json({ message: "Empresa não encontrada" });
       }
 
       const cliente = await storage.createCliente(clienteData);
@@ -182,8 +191,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cameraData = insertCameraSchema.parse(req.body);
 
       // If admin (not super_admin), force empresaId to their own company
-      if (user.tipo === "admin" && user.empresaId) {
+      if (user.tipo === "admin") {
+        if (!user.empresaId) {
+          return res.status(403).json({ message: "Admin sem empresa associada" });
+        }
         cameraData.empresaId = user.empresaId;
+      }
+
+      // Validate empresa exists
+      const empresa = await storage.getEmpresa(cameraData.empresaId);
+      if (!empresa) {
+        return res.status(404).json({ message: "Empresa não encontrada" });
       }
 
       const camera = await storage.createCamera(cameraData);
@@ -199,13 +217,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/camera-acessos", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
     try {
       const { cameraId, clienteIds } = batchCameraAcessoSchema.parse(req.body);
-
-      // Verify camera belongs to user's company (if not super admin)
       const user = req.user!;
+
+      // Verify camera exists and belongs to user's company (if admin)
+      const camera = await storage.getCamera(cameraId);
+      if (!camera) {
+        return res.status(404).json({ message: "Câmera não encontrada" });
+      }
+
       if (user.tipo === "admin") {
-        const camera = await storage.getCamera(cameraId);
-        if (!camera || camera.empresaId !== user.empresaId) {
+        if (!user.empresaId || camera.empresaId !== user.empresaId) {
           return res.status(403).json({ message: "Sem permissão para gerenciar esta câmera" });
+        }
+      }
+
+      // Verify all clients belong to the same company as the camera
+      for (const clienteId of clienteIds) {
+        const cliente = await storage.getCliente(clienteId);
+        if (!cliente) {
+          return res.status(404).json({ message: `Cliente ${clienteId} não encontrado` });
+        }
+        if (cliente.empresaId !== camera.empresaId) {
+          return res.status(403).json({ message: "Cliente deve pertencer à mesma empresa da câmera" });
         }
       }
 
