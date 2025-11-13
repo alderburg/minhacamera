@@ -14,13 +14,20 @@ import { useState, useEffect } from "react";
 import type { Cliente, InsertCliente, Empresa } from "@shared/schema";
 
 export default function MobileClienteForm() {
-  const [, params] = useRoute("/mobile/clientes/edit/:id");
+  const [match, params] = useRoute("/mobile/clientes/edit/:id");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  
+  console.log('Route match:', match);
+  console.log('Route params:', params);
+  
   const clienteId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!clienteId;
   const isSuperAdmin = user?.tipo === "super_admin";
+  
+  console.log('Parsed clienteId:', clienteId);
+  console.log('isEditing:', isEditing);
 
   const [formData, setFormData] = useState<InsertCliente>({
     nome: "",

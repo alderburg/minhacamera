@@ -13,11 +13,18 @@ import { useState, useEffect } from "react";
 import type { Empresa, InsertEmpresa } from "@shared/schema";
 
 export default function MobileEmpresaForm() {
-  const [, params] = useRoute("/mobile/empresas/edit/:id");
+  const [match, params] = useRoute("/mobile/empresas/edit/:id");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  
+  console.log('Route match:', match);
+  console.log('Route params:', params);
+  
   const empresaId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!empresaId;
+  
+  console.log('Parsed empresaId:', empresaId);
+  console.log('isEditing:', isEditing);
 
   const [formData, setFormData] = useState<InsertEmpresa>({
     nome: "",
