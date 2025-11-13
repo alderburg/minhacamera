@@ -12,16 +12,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Building2, Loader2 } from "lucide-react";
+import { Plus, Building2, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Empresa, InsertEmpresa } from "@shared/schema";
 
 export default function Empresas() {
   const { user, isLoading: authLoading } = useRequireAuth(["super_admin"]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingEmpresa, setEditingEmpresa] = useState<Empresa | null>(null);
+  const [deletingEmpresa, setDeletingEmpresa] = useState<Empresa | null>(null);
   const [formData, setFormData] = useState<InsertEmpresa>({
     nome: "",
     logo: "",
@@ -37,21 +50,47 @@ export default function Empresas() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertEmpresa) => {
+      if (editingEmpresa) {
+        return await apiRequest("PATCH", `/api/empresas/${editingEmpresa.id}`, data);
+      }
       return await apiRequest("POST", "/api/empresas", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
       setIsDialogOpen(false);
+      setEditingEmpresa(null);
       setFormData({ nome: "", logo: "", dominio: "", ativo: true });
       toast({
-        title: "Empresa criada",
-        description: "A empresa foi criada com sucesso",
+        title: editingEmpresa ? "Empresa atualizada" : "Empresa criada",
+        description: editingEmpresa ? "A empresa foi atualizada com sucesso" : "A empresa foi criada com sucesso",
       });
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erro ao criar empresa",
+        title: editingEmpresa ? "Erro ao atualizar empresa" : "Erro ao criar empresa",
+        description: error.message,
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/empresas/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
+      setIsDeleteDialogOpen(false);
+      setDeletingEmpresa(null);
+      toast({
+        title: "Empresa excluída",
+        description: "A empresa foi excluída com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir empresa",
         description: error.message,
       });
     },
@@ -60,6 +99,36 @@ export default function Empresas() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate(formData);
+  };
+
+  const handleEdit = (empresa: Empresa) => {
+    setEditingEmpresa(empresa);
+    setFormData({
+      nome: empresa.nome,
+      logo: empresa.logo || "",
+      dominio: empresa.dominio || "",
+      ativo: empresa.ativo,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (empresa: Empresa) => {
+    setDeletingEmpresa(empresa);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingEmpresa) {
+      deleteMutation.mutate(deletingEmpresa.id);
+    }
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setEditingEmpresa(null);
+      setFormData({ nome: "", logo: "", dominio: "", ativo: true });
+    }
+    setIsDialogOpen(open);
   };
 
   if (authLoading || isLoading) {
@@ -106,10 +175,30 @@ export default function Empresas() {
                       {empresa.dominio}
                     </p>
                   )}
-                  <div className="mt-3">
+                  <div className="mt-3 flex items-center gap-2">
                     <Badge variant={empresa.ativo ? "default" : "secondary"} className="text-xs">
                       {empresa.ativo ? "Ativa" : "Inativa"}
                     </Badge>
+                    <div className="ml-auto flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleEdit(empresa)}
+                        data-testid={`button-edit-empresa-${empresa.id}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(empresa)}
+                        data-testid={`button-delete-empresa-${empresa.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -134,12 +223,12 @@ export default function Empresas() {
         </Card>
       )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nova Empresa</DialogTitle>
+            <DialogTitle>{editingEmpresa ? "Editar Empresa" : "Nova Empresa"}</DialogTitle>
             <DialogDescription>
-              Cadastre uma nova empresa no sistema
+              {editingEmpresa ? "Atualize os dados da empresa" : "Cadastre uma nova empresa no sistema"}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -196,16 +285,44 @@ export default function Empresas() {
                 {createMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando...
+                    {editingEmpresa ? "Atualizando..." : "Criando..."}
                   </>
                 ) : (
-                  "Criar Empresa"
+                  editingEmpresa ? "Atualizar Empresa" : "Criar Empresa"
                 )}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a empresa "{deletingEmpresa?.nome}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

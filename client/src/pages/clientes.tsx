@@ -12,6 +12,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Loader2, Mail, Phone } from "lucide-react";
+import { Plus, Users, Loader2, Mail, Phone, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Cliente, InsertCliente, Empresa } from "@shared/schema";
@@ -30,6 +40,9 @@ import type { Cliente, InsertCliente, Empresa } from "@shared/schema";
 export default function Clientes() {
   const { user, isLoading: authLoading } = useRequireAuth(["super_admin", "admin"]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [deletingCliente, setDeletingCliente] = useState<Cliente | null>(null);
   const [formData, setFormData] = useState<InsertCliente>({
     nome: "",
     email: "",
@@ -53,21 +66,47 @@ export default function Clientes() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertCliente) => {
+      if (editingCliente) {
+        return await apiRequest("PATCH", `/api/clientes/${editingCliente.id}`, data);
+      }
       return await apiRequest("POST", "/api/clientes", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clientes"] });
       setIsDialogOpen(false);
+      setEditingCliente(null);
       setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
       toast({
-        title: "Cliente criado",
-        description: "O cliente foi criado com sucesso",
+        title: editingCliente ? "Cliente atualizado" : "Cliente criado",
+        description: editingCliente ? "O cliente foi atualizado com sucesso" : "O cliente foi criado com sucesso",
       });
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erro ao criar cliente",
+        title: editingCliente ? "Erro ao atualizar cliente" : "Erro ao criar cliente",
+        description: error.message,
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/clientes/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clientes"] });
+      setIsDeleteDialogOpen(false);
+      setDeletingCliente(null);
+      toast({
+        title: "Cliente excluído",
+        description: "O cliente foi excluído com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir cliente",
         description: error.message,
       });
     },
@@ -75,8 +114,38 @@ export default function Clientes() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For admins, empresaId will be set by backend
     createMutation.mutate(formData);
+  };
+
+  const handleEdit = (cliente: Cliente) => {
+    setEditingCliente(cliente);
+    setFormData({
+      nome: cliente.nome,
+      email: cliente.email,
+      telefone: cliente.telefone || "",
+      empresaId: cliente.empresaId,
+      ativo: cliente.ativo,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (cliente: Cliente) => {
+    setDeletingCliente(cliente);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingCliente) {
+      deleteMutation.mutate(deletingCliente.id);
+    }
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setEditingCliente(null);
+      setFormData({ nome: "", email: "", telefone: "", empresaId: 0, ativo: true });
+    }
+    setIsDialogOpen(open);
   };
 
   const getInitials = (nome: string) => {
@@ -133,10 +202,30 @@ export default function Clientes() {
                       </div>
                     )}
                   </div>
-                  <div className="mt-3">
+                  <div className="mt-3 flex items-center gap-2">
                     <Badge variant={cliente.ativo ? "default" : "secondary"} className="text-xs">
                       {cliente.ativo ? "Ativo" : "Inativo"}
                     </Badge>
+                    <div className="ml-auto flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleEdit(cliente)}
+                        data-testid={`button-edit-cliente-${cliente.id}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(cliente)}
+                        data-testid={`button-delete-cliente-${cliente.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -161,12 +250,12 @@ export default function Clientes() {
         </Card>
       )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Novo Cliente</DialogTitle>
+            <DialogTitle>{editingCliente ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
             <DialogDescription>
-              Cadastre um novo cliente no sistema
+              {editingCliente ? "Atualize os dados do cliente" : "Cadastre um novo cliente no sistema"}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -246,16 +335,44 @@ export default function Clientes() {
                 {createMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando...
+                    {editingCliente ? "Atualizando..." : "Criando..."}
                   </>
                 ) : (
-                  "Criar Cliente"
+                  editingCliente ? "Atualizar Cliente" : "Criar Cliente"
                 )}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o cliente "{deletingCliente?.nome}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

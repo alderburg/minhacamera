@@ -88,6 +88,15 @@ export class DatabaseStorage implements IStorage {
     return empresa;
   }
 
+  async updateEmpresa(id: number, updateData: InsertEmpresa): Promise<Empresa | undefined> {
+    const [empresa] = await db.update(empresas).set(updateData).where(eq(empresas.id, id)).returning();
+    return empresa || undefined;
+  }
+
+  async deleteEmpresa(id: number): Promise<void> {
+    await db.delete(empresas).where(eq(empresas.id, id));
+  }
+
   // Clientes
   async getAllClientes(empresaId?: number): Promise<Cliente[]> {
     if (empresaId) {
@@ -104,6 +113,15 @@ export class DatabaseStorage implements IStorage {
   async createCliente(insertCliente: InsertCliente): Promise<Cliente> {
     const [cliente] = await db.insert(clientes).values(insertCliente).returning();
     return cliente;
+  }
+
+  async updateCliente(id: number, updateData: InsertCliente): Promise<Cliente | undefined> {
+    const [cliente] = await db.update(clientes).set(updateData).where(eq(clientes.id, id)).returning();
+    return cliente || undefined;
+  }
+
+  async deleteCliente(id: number): Promise<void> {
+    await db.delete(clientes).where(eq(clientes.id, id));
   }
 
   // Cameras
@@ -136,6 +154,15 @@ export class DatabaseStorage implements IStorage {
   async createCamera(insertCamera: InsertCamera): Promise<Camera> {
     const [camera] = await db.insert(cameras).values(insertCamera).returning();
     return camera;
+  }
+
+  async updateCamera(id: number, updateData: InsertCamera): Promise<Camera | undefined> {
+    const [camera] = await db.update(cameras).set(updateData).where(eq(cameras.id, id)).returning();
+    return camera || undefined;
+  }
+
+  async deleteCamera(id: number): Promise<void> {
+    await db.delete(cameras).where(eq(cameras.id, id));
   }
 
   // Camera Acessos

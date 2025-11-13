@@ -113,6 +113,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/empresas/:id", authenticateToken, requireRole("super_admin"), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const empresaData = insertEmpresaSchema.parse(req.body);
+      const empresa = await storage.updateEmpresa(id, empresaData);
+      if (!empresa) {
+        return res.status(404).json({ message: "Empresa não encontrada" });
+      }
+      res.json(empresa);
+    } catch (error) {
+      console.error("Update empresa error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao atualizar empresa" });
+    }
+  });
+
+  app.delete("/api/empresas/:id", authenticateToken, requireRole("super_admin"), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteEmpresa(id);
+      res.json({ message: "Empresa excluída com sucesso" });
+    } catch (error) {
+      console.error("Delete empresa error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao excluir empresa" });
+    }
+  });
+
   // ==================== CLIENTES ROUTES ====================
 
   app.get("/api/clientes", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
@@ -154,6 +180,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Create cliente error:", error);
       res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao criar cliente" });
+    }
+  });
+
+  app.patch("/api/clientes/:id", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      const id = parseInt(req.params.id);
+      const clienteData = insertClienteSchema.parse(req.body);
+
+      // Verify cliente exists
+      const existingCliente = await storage.getCliente(id);
+      if (!existingCliente) {
+        return res.status(404).json({ message: "Cliente não encontrado" });
+      }
+
+      // If admin, verify cliente belongs to their company
+      if (user.tipo === "admin") {
+        if (!user.empresaId || existingCliente.empresaId !== user.empresaId) {
+          return res.status(403).json({ message: "Sem permissão para editar este cliente" });
+        }
+        clienteData.empresaId = user.empresaId;
+      }
+
+      const cliente = await storage.updateCliente(id, clienteData);
+      res.json(cliente);
+    } catch (error) {
+      console.error("Update cliente error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao atualizar cliente" });
+    }
+  });
+
+  app.delete("/api/clientes/:id", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      const id = parseInt(req.params.id);
+
+      // Verify cliente exists
+      const existingCliente = await storage.getCliente(id);
+      if (!existingCliente) {
+        return res.status(404).json({ message: "Cliente não encontrado" });
+      }
+
+      // If admin, verify cliente belongs to their company
+      if (user.tipo === "admin") {
+        if (!user.empresaId || existingCliente.empresaId !== user.empresaId) {
+          return res.status(403).json({ message: "Sem permissão para excluir este cliente" });
+        }
+      }
+
+      await storage.deleteCliente(id);
+      res.json({ message: "Cliente excluído com sucesso" });
+    } catch (error) {
+      console.error("Delete cliente error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao excluir cliente" });
     }
   });
 
@@ -209,6 +289,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Create camera error:", error);
       res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao criar câmera" });
+    }
+  });
+
+  app.patch("/api/cameras/:id", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      const id = parseInt(req.params.id);
+      const cameraData = insertCameraSchema.parse(req.body);
+
+      // Verify camera exists
+      const existingCamera = await storage.getCamera(id);
+      if (!existingCamera) {
+        return res.status(404).json({ message: "Câmera não encontrada" });
+      }
+
+      // If admin, verify camera belongs to their company
+      if (user.tipo === "admin") {
+        if (!user.empresaId || existingCamera.empresaId !== user.empresaId) {
+          return res.status(403).json({ message: "Sem permissão para editar esta câmera" });
+        }
+        cameraData.empresaId = user.empresaId;
+      }
+
+      const camera = await storage.updateCamera(id, cameraData);
+      res.json(camera);
+    } catch (error) {
+      console.error("Update camera error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao atualizar câmera" });
+    }
+  });
+
+  app.delete("/api/cameras/:id", authenticateToken, requireRole("super_admin", "admin"), async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      const id = parseInt(req.params.id);
+
+      // Verify camera exists
+      const existingCamera = await storage.getCamera(id);
+      if (!existingCamera) {
+        return res.status(404).json({ message: "Câmera não encontrada" });
+      }
+
+      // If admin, verify camera belongs to their company
+      if (user.tipo === "admin") {
+        if (!user.empresaId || existingCamera.empresaId !== user.empresaId) {
+          return res.status(403).json({ message: "Sem permissão para excluir esta câmera" });
+        }
+      }
+
+      await storage.deleteCamera(id);
+      res.json({ message: "Câmera excluída com sucesso" });
+    } catch (error) {
+      console.error("Delete camera error:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Erro ao excluir câmera" });
     }
   });
 

@@ -12,6 +12,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Video, Loader2, MapPin, Edit } from "lucide-react";
+import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
@@ -31,7 +41,10 @@ export default function CamerasManagement() {
   const { user, isLoading: authLoading } = useRequireAuth(["super_admin", "admin"]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAccessDialogOpen, setIsAccessDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null);
+  const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
+  const [deletingCamera, setDeletingCamera] = useState<Camera | null>(null);
   const [selectedClientes, setSelectedClientes] = useState<number[]>([]);
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
@@ -63,11 +76,15 @@ export default function CamerasManagement() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertCamera) => {
+      if (editingCamera) {
+        return await apiRequest("PATCH", `/api/cameras/${editingCamera.id}`, data);
+      }
       return await apiRequest("POST", "/api/cameras", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cameras"] });
       setIsDialogOpen(false);
+      setEditingCamera(null);
       setFormData({
         nome: "",
         urlRtsp: "",
@@ -78,14 +95,36 @@ export default function CamerasManagement() {
         resolucaoPreferida: "720p",
       });
       toast({
-        title: "Câmera criada",
-        description: "A câmera foi criada com sucesso",
+        title: editingCamera ? "Câmera atualizada" : "Câmera criada",
+        description: editingCamera ? "A câmera foi atualizada com sucesso" : "A câmera foi criada com sucesso",
       });
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erro ao criar câmera",
+        title: editingCamera ? "Erro ao atualizar câmera" : "Erro ao criar câmera",
+        description: error.message,
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/cameras/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cameras"] });
+      setIsDeleteDialogOpen(false);
+      setDeletingCamera(null);
+      toast({
+        title: "Câmera excluída",
+        description: "A câmera foi excluída com sucesso",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir câmera",
         description: error.message,
       });
     },
@@ -116,6 +155,47 @@ export default function CamerasManagement() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate(formData);
+  };
+
+  const handleEdit = (camera: Camera) => {
+    setEditingCamera(camera);
+    setFormData({
+      nome: camera.nome,
+      urlRtsp: camera.urlRtsp,
+      empresaId: camera.empresaId,
+      ativa: camera.ativa,
+      localizacao: camera.localizacao || "",
+      diasGravacao: camera.diasGravacao || 7,
+      resolucaoPreferida: camera.resolucaoPreferida || "720p",
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (camera: Camera) => {
+    setDeletingCamera(camera);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingCamera) {
+      deleteMutation.mutate(deletingCamera.id);
+    }
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setEditingCamera(null);
+      setFormData({
+        nome: "",
+        urlRtsp: "",
+        empresaId: 0,
+        ativa: true,
+        localizacao: "",
+        diasGravacao: 7,
+        resolucaoPreferida: "720p",
+      });
+    }
+    setIsDialogOpen(open);
   };
 
   const handleAccessSubmit = (e: React.FormEvent) => {
@@ -203,6 +283,26 @@ export default function CamerasManagement() {
                   <Edit className="h-3 w-3 mr-1" />
                   Acessos
                 </Button>
+                <div className="ml-auto flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleEdit(camera)}
+                    data-testid={`button-edit-camera-${camera.id}`}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() => handleDelete(camera)}
+                    data-testid={`button-delete-camera-${camera.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -225,12 +325,12 @@ export default function CamerasManagement() {
         </Card>
       )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Nova Câmera</DialogTitle>
+            <DialogTitle>{editingCamera ? "Editar Câmera" : "Nova Câmera"}</DialogTitle>
             <DialogDescription>
-              Cadastre uma nova câmera IP no sistema
+              {editingCamera ? "Atualize os dados da câmera" : "Cadastre uma nova câmera IP no sistema"}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -359,16 +459,44 @@ export default function CamerasManagement() {
                 {createMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando...
+                    {editingCamera ? "Atualizando..." : "Criando..."}
                   </>
                 ) : (
-                  "Criar Câmera"
+                  editingCamera ? "Atualizar Câmera" : "Criar Câmera"
                 )}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a câmera "{deletingCamera?.nome}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                "Excluir"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={isAccessDialogOpen} onOpenChange={setIsAccessDialogOpen}>
         <DialogContent>
