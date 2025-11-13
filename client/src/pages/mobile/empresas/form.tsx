@@ -60,13 +60,22 @@ export default function MobileEmpresaForm() {
   }, []);
 
   useEffect(() => {
+    console.log('=== EMPRESAS FORM DEBUG ===');
+    console.log('empresaId:', empresaId);
+    console.log('isEditing:', isEditing);
+    console.log('isLoadingEmpresa:', isLoadingEmpresa);
+    console.log('empresa data:', empresa);
+    
     if (empresa) {
+      console.log('Carregando dados da empresa no formulário:', empresa);
       setFormData({
         nome: empresa.nome,
         logo: empresa.logo || "",
         dominio: empresa.dominio || "",
         ativo: empresa.ativo,
       });
+    } else {
+      console.log('Empresa não carregada ainda');
     }
   }, [empresa]);
 

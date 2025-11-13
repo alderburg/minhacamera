@@ -72,7 +72,16 @@ export default function MobileClienteForm() {
   }, []);
 
   useEffect(() => {
+    console.log('=== CLIENTES FORM DEBUG ===');
+    console.log('clienteId:', clienteId);
+    console.log('isEditing:', isEditing);
+    console.log('isLoadingCliente:', isLoadingCliente);
+    console.log('cliente data:', cliente);
+    console.log('empresas data:', empresas);
+    console.log('isSuperAdmin:', isSuperAdmin);
+    
     if (cliente) {
+      console.log('Carregando dados do cliente no formulário:', cliente);
       setFormData({
         nome: cliente.nome,
         email: cliente.email || "",
@@ -84,11 +93,14 @@ export default function MobileClienteForm() {
       // Buscar e definir a empresa selecionada se for super admin
       if (isSuperAdmin && empresas) {
         const empresa = empresas.find(e => e.id === cliente.empresaId);
+        console.log('Empresa encontrada:', empresa);
         if (empresa) {
           setSelectedEmpresa(empresa);
           setEmpresaSearchTerm(empresa.nome);
         }
       }
+    } else {
+      console.log('Cliente não carregado ainda');
     }
   }, [cliente, empresas, isSuperAdmin]);
 

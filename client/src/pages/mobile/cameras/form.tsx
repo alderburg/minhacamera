@@ -86,7 +86,16 @@ export default function MobileCameraForm() {
   }, []);
 
   useEffect(() => {
+    console.log('=== CAMERAS FORM DEBUG ===');
+    console.log('cameraId:', cameraId);
+    console.log('isEditing:', isEditing);
+    console.log('isLoadingCamera:', isLoadingCamera);
+    console.log('camera data:', camera);
+    console.log('empresas data:', empresas);
+    console.log('isSuperAdmin:', isSuperAdmin);
+    
     if (camera) {
+      console.log('Carregando dados da câmera no formulário:', camera);
       setFormData({
         nome: camera.nome,
         protocolo: camera.protocolo || "RTSP",
@@ -110,11 +119,14 @@ export default function MobileCameraForm() {
 
       if (isSuperAdmin && empresas) {
         const empresa = empresas.find(e => e.id === camera.empresaId);
+        console.log('Empresa encontrada:', empresa);
         if (empresa) {
           setSelectedEmpresa(empresa);
           setEmpresaSearchTerm(empresa.nome);
         }
       }
+    } else {
+      console.log('Câmera não carregada ainda');
     }
   }, [camera, empresas, isSuperAdmin]);
 
