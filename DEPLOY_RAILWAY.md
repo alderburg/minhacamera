@@ -37,10 +37,12 @@ PORT=5000
 
 ### 3. Deploy do Código
 
-#### Opção A: Via GitHub
-1. Conecte seu repositório GitHub ao Railway
-2. O Railway detectará automaticamente o `nixpacks.toml` e `railway.json`
-3. O build será executado automaticamente
+#### Opção A: Via GitHub (Recomendado)
+1. Faça push do código para um repositório GitHub
+2. No Railway, clique em "New Project" → "Deploy from GitHub repo"
+3. Selecione seu repositório
+4. O Railway detectará automaticamente o arquivo `.nixpacks.toml`
+5. O build será executado automaticamente
 
 #### Opção B: Via Railway CLI
 ```bash
@@ -50,12 +52,17 @@ npm i -g @railway/cli
 # Login
 railway login
 
-# Linkar ao projeto
-railway link
+# Iniciar novo projeto
+railway init
 
 # Deploy
 railway up
 ```
+
+**IMPORTANTE**: Certifique-se de que os seguintes arquivos estejam no repositório:
+- `.nixpacks.toml` - Configuração de build
+- `package.json` - Dependências
+- Todo o código-fonte
 
 ### 4. Verificar o Deploy
 
@@ -63,11 +70,27 @@ Após o deploy, o Railway fornecerá uma URL pública. Acesse-a para verificar s
 
 ## Estrutura de Build
 
-O sistema usa Nixpacks para build automático:
+O sistema usa Nixpacks para build automático conforme o arquivo `.nixpacks.toml`:
 
-1. **Install**: `npm ci` - Instala dependências
-2. **Build**: `npm run build` - Compila frontend (Vite) e backend (esbuild)
-3. **Start**: `npm start` - Inicia o servidor em produção
+1. **Setup**: Instala Node.js 20
+2. **Install**: `npm ci` - Instala dependências do package.json
+3. **Build**: `npm run build` - Compila frontend (Vite) e backend (esbuild)
+4. **Start**: `npm start` - Inicia o servidor em produção na porta 5000
+
+O arquivo `.nixpacks.toml` contém:
+```toml
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
+```
 
 ## Comandos Úteis
 
