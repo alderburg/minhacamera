@@ -196,6 +196,26 @@
       padding-left: 1rem;
       padding-right: 1rem;
     }
+
+    /* Ocultar scrollbar em mobile mantendo scroll funcional */
+    body {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    
+    body::-webkit-scrollbar {
+      display: none;  /* Chrome, Safari and Opera */
+    }
+    
+    /* Aplicar para todos os containers com scroll */
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    *::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
