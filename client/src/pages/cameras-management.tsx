@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2 } from "lucide-react";
+import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
 import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
@@ -45,6 +45,7 @@ export default function CamerasManagement() {
   const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null);
   const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
   const [deletingCamera, setDeletingCamera] = useState<Camera | null>(null);
+  const [fullscreenCamera, setFullscreenCamera] = useState<Camera | null>(null);
   const [selectedClientes, setSelectedClientes] = useState<number[]>([]);
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
@@ -229,6 +230,46 @@ export default function CamerasManagement() {
     );
   }
 
+  if (fullscreenCamera) {
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+        <div className="h-16 border-b flex items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold">{fullscreenCamera.nome}</h2>
+            <CameraStatus online={fullscreenCamera.ativa} />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setFullscreenCamera(null)}
+            data-testid="button-exit-fullscreen"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="flex-1 p-6">
+          <div className="h-full w-full bg-card rounded-lg border flex items-center justify-center">
+            <div className="text-center">
+              <Video className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-2">
+                Stream ao vivo será implementado aqui
+              </p>
+              <p className="text-xs font-mono text-muted-foreground px-4 break-all max-w-2xl">
+                {fullscreenCamera.urlRtsp}
+              </p>
+              {fullscreenCamera.localizacao && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  <MapPin className="h-3 w-3 inline mr-1" />
+                  {fullscreenCamera.localizacao}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -270,7 +311,7 @@ export default function CamerasManagement() {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-4 flex items-center gap-2 flex-wrap">
                 <Badge variant={camera.ativa ? "default" : "secondary"} className="text-xs">
                   {camera.ativa ? "Ativa" : "Inativa"}
                 </Badge>
@@ -284,6 +325,15 @@ export default function CamerasManagement() {
                   Acessos
                 </Button>
                 <div className="ml-auto flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFullscreenCamera(camera)}
+                    data-testid={`button-view-camera-${camera.id}`}
+                  >
+                    <Video className="h-3 w-3 mr-1" />
+                    Ver
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
