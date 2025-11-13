@@ -1110,7 +1110,23 @@ export default function CamerasManagement() {
               )}
 
               {/* Clientes que já possuem acesso */}
-              {cameraAcessos && cameraAcessos.length > 0 && (
+              {cameraAcessos === undefined ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-blue-200" />
+                    <Label className="text-blue-700 font-semibold">
+                      Com Acesso Atual
+                    </Label>
+                    <div className="h-px flex-1 bg-blue-200" />
+                  </div>
+                  <div className="flex items-center justify-center py-8 border border-blue-200 rounded-lg bg-blue-50/30">
+                    <div className="text-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
+                      <p className="text-sm text-blue-700">Carregando acessos...</p>
+                    </div>
+                  </div>
+                </div>
+              ) : cameraAcessos && cameraAcessos.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="h-px flex-1 bg-blue-200" />
