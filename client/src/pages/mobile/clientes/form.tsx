@@ -103,7 +103,7 @@ export default function MobileClienteForm() {
         subtitle={isEditing ? "Atualize os dados do cliente" : "Preencha os dados abaixo"}
       />
 
-      <form onSubmit={handleSubmit} className="pt-20 px-4 pb-6 md:px-4 md:pt-0">
+      <form onSubmit={handleSubmit} className="pt-24 px-4 pb-6 md:px-4 md:pt-0">
         <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="nome" className="text-sm font-medium text-gray-700">

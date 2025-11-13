@@ -63,13 +63,7 @@ export default function MobileCamerasList() {
         backUrl="/dashboard"
         title="Câmeras"
         subtitle={`${filteredCameras.length} câmeras cadastradas`}
-        rightAction={
-          <Link href="/mobile/cameras/new">
-            <button className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-              <Plus className="h-5 w-5 text-white" />
-            </button>
-          </Link>
-        }
+        icon={Video}
       />
 
       <div className="p-4 pt-24 pb-8 space-y-4">
@@ -161,6 +155,15 @@ export default function MobileCamerasList() {
           </div>
         )}
       </div>
+
+      <Link href="/mobile/cameras/new">
+        <button 
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center justify-center transition-all hover:scale-105 z-40"
+          data-testid="button-add-camera"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      </Link>
 
       <MobileBottomNav />
     </div>

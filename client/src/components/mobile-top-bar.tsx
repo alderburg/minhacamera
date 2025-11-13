@@ -1,4 +1,4 @@
-import { Bell, Menu, ArrowLeft } from "lucide-react";
+import { Bell, Menu, ArrowLeft, LucideIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Link } from "wouter";
@@ -10,6 +10,7 @@ interface MobileTopBarProps {
   subtitle?: string;
   rightAction?: React.ReactNode;
   showProfile?: boolean;
+  icon?: LucideIcon;
 }
 
 export function MobileTopBar({ 
@@ -18,7 +19,8 @@ export function MobileTopBar({
   title,
   subtitle,
   rightAction,
-  showProfile = true
+  showProfile = true,
+  icon: Icon
 }: MobileTopBarProps) {
   const { user } = useAuth();
 
@@ -35,7 +37,7 @@ export function MobileTopBar({
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-blue-600 z-50 md:hidden">
-      <div className="px-4 py-3">
+      <div className="px-4 py-4">
         {showProfile && !showBack && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -69,23 +71,30 @@ export function MobileTopBar({
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <Link href={backUrl}>
                 <button className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors">
-                  <ArrowLeft className="h-5 w-5 text-white" />
+                  <ArrowLeft className="h-6 w-6 text-white" />
                 </button>
               </Link>
               {title && (
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-white font-semibold text-base truncate">{title}</h1>
+                  <h1 className="text-white font-semibold text-lg truncate">{title}</h1>
                   {subtitle && (
-                    <p className="text-white/80 text-xs truncate">{subtitle}</p>
+                    <p className="text-white/90 text-sm truncate">{subtitle}</p>
                   )}
                 </div>
               )}
             </div>
-            {rightAction && (
-              <div className="ml-2">
-                {rightAction}
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {Icon && (
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Icon className="h-6 w-6 text-white" />
+                </div>
+              )}
+              {rightAction && (
+                <div className="ml-1">
+                  {rightAction}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

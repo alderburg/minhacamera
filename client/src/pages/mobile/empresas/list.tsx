@@ -62,16 +62,10 @@ export default function MobileEmpresasList() {
         backUrl="/dashboard"
         title="Empresas"
         subtitle={`${filteredEmpresas.length} empresas cadastradas`}
-        rightAction={
-          <Link href="/mobile/empresas/new">
-            <button className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-              <Plus className="h-5 w-5 text-white" />
-            </button>
-          </Link>
-        }
+        icon={Building2}
       />
 
-      <div className="pt-20 pb-8">
+      <div className="pt-24 pb-8">
         <div className="mb-4 px-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -154,6 +148,15 @@ export default function MobileEmpresasList() {
           </div>
         )}
       </div>
+
+      <Link href="/mobile/empresas/new">
+        <button 
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center justify-center transition-all hover:scale-105 z-40"
+          data-testid="button-add-empresa"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      </Link>
 
       <MobileBottomNav />
     </div>
