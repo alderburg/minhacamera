@@ -19,16 +19,40 @@ export default function MobileEmpresaForm() {
   const empresaId = params?.id ? parseInt(params.id) : null;
   const isEditing = !!empresaId;
 
-  const { data: empresa, isLoading: isLoadingEmpresa } = useQuery<Empresa>({
-    queryKey: [`/api/empresas/${empresaId}`],
-    enabled: !!empresaId,
-  });
-
   const [formData, setFormData] = useState<InsertEmpresa>({
     nome: "",
     logo: "",
     dominio: "",
     ativo: true,
+  });
+
+  const { data: empresa, isLoading: isLoadingEmpresa } = useQuery<Empresa>({
+    queryKey: [`/api/empresas/${empresaId}`],
+    enabled: !!empresaId,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: InsertEmpresa) => {
+      if (isEditing) {
+        return await apiRequest("PATCH", `/api/empresas/${empresaId}`, data);
+      }
+      return await apiRequest("POST", "/api/empresas", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
+      toast({
+        title: isEditing ? "Empresa atualizada" : "Empresa criada",
+        description: isEditing ? "A empresa foi atualizada com sucesso" : "A empresa foi criada com sucesso",
+      });
+      setLocation("/mobile/empresas");
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: isEditing ? "Erro ao atualizar empresa" : "Erro ao criar empresa",
+        description: error.message,
+      });
+    },
   });
 
   useEffect(() => {
@@ -62,30 +86,6 @@ export default function MobileEmpresaForm() {
       </div>
     );
   }
-
-  const saveMutation = useMutation({
-    mutationFn: async (data: InsertEmpresa) => {
-      if (isEditing) {
-        return await apiRequest("PATCH", `/api/empresas/${empresaId}`, data);
-      }
-      return await apiRequest("POST", "/api/empresas", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/empresas"] });
-      toast({
-        title: isEditing ? "Empresa atualizada" : "Empresa criada",
-        description: isEditing ? "A empresa foi atualizada com sucesso" : "A empresa foi criada com sucesso",
-      });
-      setLocation("/mobile/empresas");
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: isEditing ? "Erro ao atualizar empresa" : "Erro ao criar empresa",
-        description: error.message,
-      });
-    },
-  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

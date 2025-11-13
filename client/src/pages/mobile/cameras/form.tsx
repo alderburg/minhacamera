@@ -23,16 +23,6 @@ export default function MobileCameraForm() {
   const { user } = useAuth();
   const isSuperAdmin = user?.tipo === "super_admin";
 
-  const { data: camera, isLoading: isLoadingCamera } = useQuery<Camera>({
-    queryKey: [`/api/cameras/${cameraId}`],
-    enabled: !!cameraId,
-  });
-
-  const { data: empresas } = useQuery<Empresa[]>({
-    queryKey: ["/api/empresas"],
-    enabled: isSuperAdmin,
-  });
-
   const [formData, setFormData] = useState<InsertCamera>({
     nome: "",
     urlRtsp: "",
@@ -45,6 +35,40 @@ export default function MobileCameraForm() {
 
   const [empresaSearchTerm, setEmpresaSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
+
+  const { data: camera, isLoading: isLoadingCamera } = useQuery<Camera>({
+    queryKey: [`/api/cameras/${cameraId}`],
+    enabled: !!cameraId,
+  });
+
+  const { data: empresas } = useQuery<Empresa[]>({
+    queryKey: ["/api/empresas"],
+    enabled: isSuperAdmin,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: InsertCamera) => {
+      if (isEditing) {
+        return await apiRequest("PATCH", `/api/cameras/${cameraId}`, data);
+      }
+      return await apiRequest("POST", "/api/cameras", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cameras"] });
+      toast({
+        title: isEditing ? "Câmera atualizada" : "Câmera criada",
+        description: isEditing ? "A câmera foi atualizada com sucesso" : "A câmera foi criada com sucesso",
+      });
+      setLocation("/mobile/cameras");
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: isEditing ? "Erro ao atualizar câmera" : "Erro ao criar câmera",
+        description: error.message,
+      });
+    },
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -89,30 +113,6 @@ export default function MobileCameraForm() {
       </div>
     );
   }
-
-  const saveMutation = useMutation({
-    mutationFn: async (data: InsertCamera) => {
-      if (isEditing) {
-        return await apiRequest("PATCH", `/api/cameras/${cameraId}`, data);
-      }
-      return await apiRequest("POST", "/api/cameras", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cameras"] });
-      toast({
-        title: isEditing ? "Câmera atualizada" : "Câmera criada",
-        description: isEditing ? "A câmera foi atualizada com sucesso" : "A câmera foi criada com sucesso",
-      });
-      setLocation("/mobile/cameras");
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: isEditing ? "Erro ao atualizar câmera" : "Erro ao criar câmera",
-        description: error.message,
-      });
-    },
-  });
 
   const handleSelectEmpresa = (empresa: Empresa) => {
     setSelectedEmpresa(empresa);

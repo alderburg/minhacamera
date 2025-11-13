@@ -22,16 +22,6 @@ export default function MobileClienteForm() {
   const isEditing = !!clienteId;
   const isSuperAdmin = user?.tipo === "super_admin";
 
-  const { data: cliente, isLoading: isLoadingCliente } = useQuery<Cliente>({
-    queryKey: [`/api/clientes/${clienteId}`],
-    enabled: !!clienteId,
-  });
-
-  const { data: empresas } = useQuery<Empresa[]>({
-    queryKey: ["/api/empresas"],
-    enabled: isSuperAdmin,
-  });
-
   const [formData, setFormData] = useState<InsertCliente>({
     nome: "",
     email: "",
@@ -42,6 +32,40 @@ export default function MobileClienteForm() {
 
   const [empresaSearchTerm, setEmpresaSearchTerm] = useState("");
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
+
+  const { data: cliente, isLoading: isLoadingCliente } = useQuery<Cliente>({
+    queryKey: [`/api/clientes/${clienteId}`],
+    enabled: !!clienteId,
+  });
+
+  const { data: empresas } = useQuery<Empresa[]>({
+    queryKey: ["/api/empresas"],
+    enabled: isSuperAdmin,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: InsertCliente) => {
+      if (isEditing) {
+        return await apiRequest("PATCH", `/api/clientes/${clienteId}`, data);
+      }
+      return await apiRequest("POST", "/api/clientes", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clientes"] });
+      toast({
+        title: isEditing ? "Cliente atualizado" : "Cliente criado",
+        description: isEditing ? "O cliente foi atualizado com sucesso" : "O cliente foi criado com sucesso",
+      });
+      setLocation("/mobile/clientes");
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: isEditing ? "Erro ao atualizar cliente" : "Erro ao criar cliente",
+        description: error.message,
+      });
+    },
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -84,30 +108,6 @@ export default function MobileClienteForm() {
       </div>
     );
   }
-
-  const saveMutation = useMutation({
-    mutationFn: async (data: InsertCliente) => {
-      if (isEditing) {
-        return await apiRequest("PATCH", `/api/clientes/${clienteId}`, data);
-      }
-      return await apiRequest("POST", "/api/clientes", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clientes"] });
-      toast({
-        title: isEditing ? "Cliente atualizado" : "Cliente criado",
-        description: isEditing ? "O cliente foi atualizado com sucesso" : "O cliente foi criado com sucesso",
-      });
-      setLocation("/mobile/clientes");
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: isEditing ? "Erro ao atualizar cliente" : "Erro ao criar cliente",
-        description: error.message,
-      });
-    },
-  });
 
   const handleSelectEmpresa = (empresa: Empresa) => {
     setSelectedEmpresa(empresa);
