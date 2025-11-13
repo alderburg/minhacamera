@@ -223,10 +223,15 @@ export default function Clientes() {
   const filteredClientes = clientes?.filter((cliente) => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
+    
+    // Buscar o nome da empresa
+    const empresaNome = empresas?.find(e => e.id === cliente.empresaId)?.nome?.toLowerCase() || '';
+    
     return (
       cliente.nome.toLowerCase().includes(search) ||
       cliente.email.toLowerCase().includes(search) ||
-      cliente.telefone?.toLowerCase().includes(search)
+      cliente.telefone?.toLowerCase().includes(search) ||
+      empresaNome.includes(search)
     );
   }) || [];
 
@@ -262,7 +267,7 @@ export default function Clientes() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Pesquisar clientes por nome, e-mail ou telefone..."
+          placeholder="Pesquisar clientes por nome, e-mail, telefone ou empresa..."
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
