@@ -236,6 +236,12 @@ export default function Clientes() {
                   <h3 className="font-semibold truncate mb-1">{cliente.nome}</h3>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Building2 className="h-3 w-3" />
+                      <span className="truncate">
+                        Empresa: {empresas?.find(e => e.id === cliente.empresaId)?.nome || 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Mail className="h-3 w-3" />
                       <span className="truncate">{cliente.email}</span>
                     </div>
