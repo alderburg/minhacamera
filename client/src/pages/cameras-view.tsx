@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Grid3x3, Grid2x2, Maximize2, X } from "lucide-react";
 import { CameraStatus } from "@/components/camera-status";
+import { CameraPlayer } from "@/components/camera-player";
 import type { Camera } from "@shared/schema";
 
 type GridLayout = "2x2" | "3x3" | "4x4";
@@ -58,16 +59,10 @@ export default function CamerasView() {
           </Button>
         </div>
         <div className="flex-1 p-6">
-          <div className="h-full w-full bg-card rounded-lg border flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                Stream ao vivo será implementado aqui
-              </p>
-              <p className="text-xs font-mono text-muted-foreground">
-                {fullscreenCamera.urlRtsp}
-              </p>
-            </div>
-          </div>
+          <CameraPlayer 
+            cameraId={fullscreenCamera.id} 
+            className="h-full w-full rounded-lg border overflow-hidden"
+          />
         </div>
       </div>
     );
@@ -127,16 +122,11 @@ export default function CamerasView() {
             >
               <CardContent className="p-0">
                 <div className="relative aspect-video bg-card">
-                  <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Stream ao vivo
-                      </p>
-                      <p className="text-xs font-mono text-muted-foreground px-4 truncate">
-                        {camera.urlRtsp}
-                      </p>
-                    </div>
-                  </div>
+                  <CameraPlayer 
+                    cameraId={camera.id} 
+                    className="w-full h-full"
+                    autoPlay={false}
+                  />
 
                   <div className="absolute top-3 right-3 flex gap-2">
                     <div className="bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md">

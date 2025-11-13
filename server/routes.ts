@@ -435,14 +435,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ==================== STREAM ENDPOINT (Future: RTSP to HLS) ====================
+  // ==================== STREAM ENDPOINTS ====================
   
-  app.get("/api/stream/:cameraId", authenticateToken, async (req: AuthRequest, res) => {
+  import { startCameraStream, stopCameraStream, getStreamPath, getStreamDir } from './streaming';
+  import { existsSync } from 'fs';
+  import { join } from 'path';
+
+  // Inicia o stream de uma câmera
+  app.post("/api/stream/:cameraId/start", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const cameraId = parseInt(req.params.cameraId);
       const user = req.user!;
 
-      // Verify user has access to this camera
       const camera = await storage.getCamera(cameraId);
       if (!camera) {
         return res.status(404).json({ message: "Câmera não encontrada" });
@@ -463,16 +467,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Sem permissão para acessar esta câmera" });
       }
 
-      // TODO: Implement RTSP to HLS conversion using FFmpeg
-      // For now, return camera data
-      res.json({ 
-        camera,
-        message: "Stream endpoint - RTSP to HLS conversion será implementado aqui",
-        note: "Use FFmpeg para converter o stream RTSP para HLS"
-      });
+      const playlistPath = await startCameraStream(cameraId, camera.urlRtsp);
+      res.json({ streamUrl: playlistPath });
     } catch (error) {
-      console.error("Stream error:", error);
-      res.status(500).json({ message: "Erro ao acessar stream" });
+      console.error("Stream start error:", error);
+      res.status(500).json({ message: "Erro ao iniciar stream" });
+    }
+  });
+
+  // Para o stream de uma câmera
+  app.post("/api/stream/:cameraId/stop", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const cameraId = parseInt(req.params.cameraId);
+      await stopCameraStream(cameraId);
+      res.json({ message: "Stream parado" });
+    } catch (error) {
+      console.error("Stream stop error:", error);
+      res.status(500).json({ message: "Erro ao parar stream" });
+    }
+  });
+
+  // Serve a playlist HLS
+  app.get("/api/stream/:cameraId/playlist.m3u8", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const cameraId = parseInt(req.params.cameraId);
+      const streamDir = getStreamDir(cameraId);
+      
+      if (!streamDir) {
+        return res.status(404).json({ message: "Stream não iniciado" });
+      }
+
+      const playlistFile = join(streamDir, 'playlist.m3u8');
+      if (!existsSync(playlistFile)) {
+        return res.status(404).json({ message: "Playlist não encontrada" });
+      }
+
+      res.set('Content-Type', 'application/vnd.apple.mpegurl');
+      res.sendFile(playlistFile);
+    } catch (error) {
+      console.error("Playlist error:", error);
+      res.status(500).json({ message: "Erro ao acessar playlist" });
+    }
+  });
+
+  // Serve os segmentos HLS
+  app.get("/api/stream/:cameraId/:segment", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const cameraId = parseInt(req.params.cameraId);
+      const segment = req.params.segment;
+      const streamDir = getStreamDir(cameraId);
+      
+      if (!streamDir) {
+        return res.status(404).json({ message: "Stream não iniciado" });
+      }
+
+      const segmentFile = join(streamDir, segment);
+      if (!existsSync(segmentFile)) {
+        return res.status(404).json({ message: "Segmento não encontrado" });
+      }
+
+      res.set('Content-Type', 'video/MP2T');
+      res.sendFile(segmentFile);
+    } catch (error) {
+      console.error("Segment error:", error);
+      res.status(500).json({ message: "Erro ao acessar segmento" });
     }
   });
 

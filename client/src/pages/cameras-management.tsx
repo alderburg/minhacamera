@@ -35,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Video, Loader2, MapPin, Edit, Pencil, Trash2, X, Maximize2, Users, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CameraStatus } from "@/components/camera-status";
+import { CameraPlayer } from "@/components/camera-player";
 import type { Camera, InsertCamera, Empresa, Cliente } from "@shared/schema";
 
 export default function CamerasManagement() {
@@ -262,23 +263,10 @@ export default function CamerasManagement() {
           </Button>
         </div>
         <div className="flex-1 p-6">
-          <div className="h-full w-full bg-card rounded-lg border flex items-center justify-center">
-            <div className="text-center">
-              <Video className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-2">
-                Stream ao vivo será implementado aqui
-              </p>
-              <p className="text-xs font-mono text-muted-foreground px-4 break-all max-w-2xl">
-                {fullscreenCamera.urlRtsp}
-              </p>
-              {fullscreenCamera.localizacao && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  <MapPin className="h-3 w-3 inline mr-1" />
-                  {fullscreenCamera.localizacao}
-                </p>
-              )}
-            </div>
-          </div>
+          <CameraPlayer 
+            cameraId={fullscreenCamera.id} 
+            className="h-full w-full rounded-lg border overflow-hidden"
+          />
         </div>
       </div>
     );
