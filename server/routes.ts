@@ -14,6 +14,7 @@ import {
   insertUserSchema,
 } from "@shared/schema";
 import { startCameraStream, stopCameraStream, getStreamPath, getStreamDir } from './streaming';
+import { checkMultipleCameras } from './camera-health';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
@@ -557,7 +558,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Sem permissão para acessar esta câmera" });
       }
 
-      const playlistPath = await startCameraStream(cameraId, camera.urlRtsp);
+      if (!camera.urlConexao) {
+        return res.status(400).json({ message: "URL de conexão não configurada para esta câmera" });
+      }
+
+      const playlistPath = await startCameraStream(cameraId, camera.urlConexao);
       res.json({ streamUrl: playlistPath });
     } catch (error) {
       console.error("Stream start error:", error);
