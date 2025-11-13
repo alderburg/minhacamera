@@ -193,6 +193,12 @@ export class DatabaseStorage implements IStorage {
     await db.delete(cameraAcessos).where(eq(cameraAcessos.cameraId, cameraId));
   }
 
+  async clienteHasAccessToCamera(clienteId: number, cameraId: number): Promise<boolean> {
+    const [acesso] = await db.select().from(cameraAcessos)
+      .where(and(eq(cameraAcessos.clienteId, clienteId), eq(cameraAcessos.cameraId, cameraId)));
+    return !!acesso;
+  }
+
   // Dashboard Stats
   async getDashboardStats(empresaId?: number): Promise<{
     totalEmpresas: number;

@@ -22,7 +22,7 @@ import { users, empresas, clientes, cameras, cameraAcessos } from "@shared/schem
 import { eq, and, or } from "drizzle-orm";
 import { hash, compare } from "bcryptjs";
 import { checkCameraHealth } from "./camera-health";
-import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from "./notifications";
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount, createNotification } from "./notifications";
 
 const JWT_SECRET = process.env.SESSION_SECRET || "your-secret-key-change-in-production";
 
@@ -397,6 +397,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const camera = await storage.createCamera(cameraData);
+      
+      // Create notification
+      await createNotification(
+        'Nova Câmera Cadastrada',
+        `A câmera "${camera.nome}" foi cadastrada no sistema.`,
+        'success',
+        undefined,
+        camera.empresaId
+      );
+      
       res.status(201).json(camera);
     } catch (error) {
       console.error("Create camera error:", error);
@@ -426,6 +436,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cameraData = insertCameraSchema.parse(req.body);
 
       const camera = await storage.updateCamera(id, cameraData);
+      
+      // Create notification
+      await createNotification(
+        'Câmera Atualizada',
+        `A câmera "${camera?.nome || existingCamera.nome}" foi atualizada.`,
+        'info',
+        undefined,
+        camera?.empresaId || existingCamera.empresaId
+      );
+      
       res.json(camera);
     } catch (error) {
       console.error("Update camera error:", error);
@@ -451,6 +471,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Create notification before deleting
+      await createNotification(
+        'Câmera Removida',
+        `A câmera "${existingCamera.nome}" foi removida do sistema.`,
+        'warning',
+        undefined,
+        existingCamera.empresaId
+      );
+      
       await storage.deleteCamera(id);
       res.json({ message: "Câmera excluída com sucesso" });
     } catch (error) {
@@ -661,29 +690,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notifications endpoints
-  app.get("/api/notifications", requireAuth, async (req, res) => {
-    const notifications = getNotifications();
-    res.json(notifications);
-  });
+  app.get("/api/notifications", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      let notifications;
 
-  app.get("/api/notifications/unread-count", requireAuth, async (req, res) => {
-    const count = getUnreadCount();
-    res.json({ count });
-  });
+      if (user.tipo === "super_admin") {
+        notifications = await getNotifications(50);
+      } else if (user.tipo === "admin") {
+        notifications = await getNotifications(50, undefined, user.empresaId);
+      } else {
+        notifications = await getNotifications(50, user.id, user.empresaId);
+      }
 
-  app.post("/api/notifications/:id/read", requireAuth, async (req, res) => {
-    const id = parseInt(req.params.id);
-    const success = markNotificationAsRead(id);
-    if (success) {
-      res.json({ success: true });
-    } else {
-      res.status(404).json({ message: "Notification not found" });
+      res.json(notifications);
+    } catch (error) {
+      console.error("Get notifications error:", error);
+      res.status(500).json({ message: "Erro ao buscar notificações" });
     }
   });
 
-  app.post("/api/notifications/read-all", requireAuth, async (req, res) => {
-    markAllNotificationsAsRead();
-    res.json({ success: true });
+  app.get("/api/notifications/unread-count", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+      let count;
+
+      if (user.tipo === "super_admin") {
+        count = await getUnreadCount();
+      } else if (user.tipo === "admin") {
+        count = await getUnreadCount(undefined, user.empresaId);
+      } else {
+        count = await getUnreadCount(user.id, user.empresaId);
+      }
+
+      res.json({ count });
+    } catch (error) {
+      console.error("Get unread count error:", error);
+      res.status(500).json({ message: "Erro ao buscar contagem" });
+    }
+  });
+
+  app.post("/api/notifications/:id/read", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await markNotificationAsRead(id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "Notificação não encontrada" });
+      }
+    } catch (error) {
+      console.error("Mark as read error:", error);
+      res.status(500).json({ message: "Erro ao marcar notificação" });
+    }
+  });
+
+  app.post("/api/notifications/read-all", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const user = req.user!;
+
+      if (user.tipo === "super_admin") {
+        await markAllNotificationsAsRead();
+      } else if (user.tipo === "admin") {
+        await markAllNotificationsAsRead(undefined, user.empresaId);
+      } else {
+        await markAllNotificationsAsRead(user.id, user.empresaId);
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Mark all as read error:", error);
+      res.status(500).json({ message: "Erro ao marcar notificações" });
+    }
   });
 
   // Dashboard stats
